@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF to JPG — PDFLoveMe</title>
+<meta name="description" content="Convert every page of a PDF to a JPG image. Download single pages or all as a ZIP. Runs entirely in your browser — files never leave your device.">
+<link rel="canonical" href="https://pdfloveme.com/pages/pdf-to-jpg.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<!-- AdSense loader temporarily disabled (fake ad placeholder in use). Restore when approved:
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/index.html">PDF<span class="heart">♥</span>Me</a>
+    <nav class="nav">
+      <a href="/index.html#tools">Tools</a>
+      <a href="/index.html#how">How it works</a>
+      <a href="/index.html#faq">FAQ</a>
+      <a href="/blog/index.html">Blog</a>
+      <a href="/pages/about.html">About</a>
+      <a href="/pages/contact.html">Contact</a>
+      <a class="btn coral sm" href="/index.html#tools">Open a tool</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main class="tool-page">
+  <div class="wrap">
+    <!-- FAKE ad placeholder (temporary) — shows where a leaderboard ad will appear. -->
+    <div class="ad-slot ad-banner" style="margin:0 0 8px;">
+      <div>
+        <div class="ad-label">Advertisement</div>
+        <div class="ad-placeholder ad-ph-leaderboard">AD · 728×90</div>
+      </div>
+    </div>
+    <div class="crumb"><a href="../index.html">Home</a> / <a href="../index.html#tools">Tools</a> / PDF to JPG</div>
+    <div class="tool-hero">
+      <div class="ico">📸</div>
+      <h1>PDF to JPG</h1>
+      <p>Render each page to a JPG image. Click a page to save it, or download them all as a ZIP.</p>
+    </div>
+
+    <div class="panel" style="max-width:1000px;">
+      <div class="dropzone" id="dz" tabindex="0" role="button" aria-label="Add a PDF file">
+        <div class="dz-ico">📄</div>
+        <h3>Drop a PDF here</h3>
+        <p>or <span class="browse">browse</span></p>
+      </div>
+      <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden>
+      <p class="hint">Files are processed locally and never uploaded.</p>
+
+      <div id="work" class="hidden">
+        <div class="controls">
+          <div class="field">
+            <label for="qualitySel">JPG quality</label>
+            <select id="qualitySel">
+              <option value="0.6">Smaller (60%)</option>
+              <option value="0.8" selected>Balanced (80%)</option>
+              <option value="0.95">High (95%)</option>
+            </select>
+          </div>
+          <button class="btn coral" id="zipBtn">Download all as ZIP</button>
+          <button class="btn ghost" id="resetBtn">Use another file</button>
+        </div>
+        <p class="hint">Tip: click any page below to download just that image.</p>
+        <div class="preview-grid" id="grid"></div>
+      </div>
+
+      <div id="loading" class="hidden"><div class="loading-row"><span class="spinner dark"></span> Rendering pages…</div></div>
+      <div id="resultArea"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap"><div class="footer-bottom"><span>© 2026 PDFLoveMe</span><a href="../index.html">Back to home</a></div></div>
+</footer>
+
+<script src="../js/app.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+(function () {
+  const { setupDropzone, validateFile, toast, downloadBlob } = window.PDFLove;
+  let pageCanvases = []; // full-res canvases per page
+  let pageCount = 0, baseName = "page";
+  const dz = document.getElementById("dz");
+  const input = document.getElementById("fileInput");
+  const work = document.getElementById("work");
+  const grid = document.getElementById("grid");
+  const loading = document.getElementById("loading");
+  const resultArea = document.getElementById("resultArea");
+
+  function quality() { return parseFloat(document.getElementById("qualitySel").value); }
+
+  function canvasToBlob(canvas, q) {
+    return new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/jpeg", q));
+  }
+
+  setupDropzone(dz, input, {
+    accept: ["pdf"],
+    onFiles: async (incoming) => {
+      const f = incoming[0];
+      const v = validateFile(f, ["pdf"]);
+      if (!v.ok) { toast(v.reason, "err"); return; }
+      resultArea.innerHTML = ""; pageCanvases = [];
+      baseName = f.name.replace(/\.pdf$/i, "") || "page";
+      dz.classList.add("hidden");
+      loading.classList.remove("hidden");
+      try {
+        const bytes = await f.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: bytes.slice(0) }).promise;
+        pageCount = pdf.numPages;
+        grid.innerHTML = "";
+        for (let n = 1; n <= pageCount; n++) {
+          const page = await pdf.getPage(n);
+          const viewport = page.getViewport({ scale: 2.0 }); // full-res for export
+          const canvas = document.createElement("canvas");
+          canvas.width = viewport.width; canvas.height = viewport.height;
+          await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+          pageCanvases.push(canvas);
+
+          const cell = document.createElement("div");
+          cell.className = "thumb";
+          const disp = document.createElement("canvas");
+          const dscale = 150 / viewport.width;
+          disp.width = viewport.width * dscale; disp.height = viewport.height * dscale;
+          disp.getContext("2d").drawImage(canvas, 0, 0, disp.width, disp.height);
+          cell.appendChild(disp);
+          const num = document.createElement("div");
+          num.className = "pg-num"; num.textContent = "Page " + n + " — click to save";
+          cell.appendChild(num);
+          const idx = n;
+          cell.addEventListener("click", async () => {
+            const blob = await canvasToBlob(pageCanvases[idx - 1], quality());
+            downloadBlob(blob, baseName + "-page-" + idx + ".jpg");
+            toast("Saved page " + idx, "ok");
+          });
+          grid.appendChild(cell);
+        }
+        loading.classList.add("hidden");
+        work.classList.remove("hidden");
+        toast("Rendered " + pageCount + " pages", "ok");
+      } catch (e) {
+        console.error(e);
+        toast("Could not read PDF: " + e.message, "err");
+        loading.classList.add("hidden");
+        dz.classList.remove("hidden");
+      }
+    },
+  });
+
+  document.getElementById("zipBtn").addEventListener("click", async () => {
+    if (!pageCanvases.length) return;
+    const btn = document.getElementById("zipBtn");
+    btn.disabled = true; const orig = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner"></span> Zipping…';
+    try {
+      const zip = new JSZip();
+      const q = quality();
+      for (let i = 0; i < pageCanvases.length; i++) {
+        const blob = await canvasToBlob(pageCanvases[i], q);
+        zip.file(baseName + "-page-" + (i + 1) + ".jpg", blob);
+      }
+      const out = await zip.generateAsync({ type: "blob" });
+      downloadBlob(out, baseName + "-images.zip");
+      toast("ZIP ready (" + pageCanvases.length + " images)", "ok");
+    } catch (e) {
+      console.error(e);
+      toast("Could not build ZIP: " + e.message, "err");
+    } finally {
+      btn.innerHTML = orig; btn.disabled = false;
+    }
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    pageCanvases = []; pageCount = 0;
+    work.classList.add("hidden"); resultArea.innerHTML = ""; dz.classList.remove("hidden");
+  });
+})();
+</script>
+</body>
+</html>

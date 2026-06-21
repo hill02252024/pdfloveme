@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compress PDF — PDFLoveMe</title>
+<meta name="description" content="Shrink PDF file size by rebuilding pages as optimised images. Free and runs entirely in your browser — files never leave your device.">
+<link rel="canonical" href="https://pdfloveme.com/pages/compress.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<!-- AdSense loader temporarily disabled (fake ad placeholder in use). Restore when approved:
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/index.html">PDF<span class="heart">♥</span>Me</a>
+    <nav class="nav">
+      <a href="/index.html#tools">Tools</a>
+      <a href="/index.html#how">How it works</a>
+      <a href="/index.html#faq">FAQ</a>
+      <a href="/blog/index.html">Blog</a>
+      <a href="/pages/about.html">About</a>
+      <a href="/pages/contact.html">Contact</a>
+      <a class="btn coral sm" href="/index.html#tools">Open a tool</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main class="tool-page">
+  <div class="wrap">
+    <!-- FAKE ad placeholder (temporary) — shows where a leaderboard ad will appear. -->
+    <div class="ad-slot ad-banner" style="margin:0 0 8px;">
+      <div>
+        <div class="ad-label">Advertisement</div>
+        <div class="ad-placeholder ad-ph-leaderboard">AD · 728×90</div>
+      </div>
+    </div>
+    <div class="crumb"><a href="../index.html">Home</a> / <a href="../index.html#tools">Tools</a> / Compress PDF</div>
+    <div class="tool-hero">
+      <div class="ico">📉</div>
+      <h1>Compress PDF</h1>
+      <p>Reduce file size by rebuilding pages as optimised images — perfect for email and uploads.</p>
+    </div>
+
+    <div class="panel">
+      <!-- Upsell removed — Compress is now FREE for everyone. Preserved below for restore:
+      <div class="upsell" id="upsell">
+        <div class="ico">⭐</div>
+        <h3>Compress is a Pro feature</h3>
+        <p>Upgrade to Pro ($4/mo) to unlock PDF compression, 500 MB files and up to 100 files per task.</p>
+        <a class="btn coral" href="../index.html#pricing">Upgrade to Pro</a>
+      </div>
+      -->
+
+      <!-- Tool area (free for everyone) -->
+      <div id="tool">
+        <div class="dropzone" id="dz" tabindex="0" role="button" aria-label="Add a PDF file">
+          <div class="dz-ico">📄</div>
+          <h3>Drop a PDF here</h3>
+          <p>or <span class="browse">browse</span></p>
+        </div>
+        <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden>
+        <p class="hint">Files are processed locally and never uploaded.</p>
+
+        <div id="work" class="hidden">
+          <div class="controls">
+            <div class="field">
+              <label for="levelSel">Compression level</label>
+              <select id="levelSel">
+                <option value="strong">Strong (smallest)</option>
+                <option value="balanced" selected>Balanced</option>
+                <option value="light">Light (best quality)</option>
+              </select>
+            </div>
+            <button class="btn coral" id="compBtn">Compress PDF</button>
+            <button class="btn ghost" id="resetBtn">Use another file</button>
+          </div>
+        </div>
+
+        <div id="loading" class="hidden"><div class="loading-row"><span class="spinner dark"></span> Compressing…</div></div>
+        <div id="resultArea"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap"><div class="footer-bottom"><span>© 2026 PDFLoveMe</span><a href="../index.html">Back to home</a></div></div>
+</footer>
+
+<script src="../js/app.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+(function () {
+  const { setupDropzone, validateFile, fmtSize, toast, downloadBytes } = window.PDFLove;
+  // Compress is FREE for everyone — Pro gating removed.
+
+  let pdfBytes = null, origSize = 0, fileName = "document";
+  const dz = document.getElementById("dz");
+  const input = document.getElementById("fileInput");
+  const work = document.getElementById("work");
+  const loading = document.getElementById("loading");
+  const resultArea = document.getElementById("resultArea");
+
+  const LEVELS = {
+    strong:   { scale: 1.0, quality: 0.5 },
+    balanced: { scale: 1.5, quality: 0.7 },
+    light:    { scale: 2.0, quality: 0.85 },
+  };
+
+  function canvasToBytes(canvas, q) {
+    return new Promise((resolve) => canvas.toBlob(async (b) => {
+      resolve(new Uint8Array(await b.arrayBuffer()));
+    }, "image/jpeg", q));
+  }
+
+  setupDropzone(dz, input, {
+    accept: ["pdf"],
+    onFiles: async (incoming) => {
+      const f = incoming[0];
+      const v = validateFile(f, ["pdf"]);
+      if (!v.ok) { toast(v.reason, "err"); return; }
+      resultArea.innerHTML = "";
+      pdfBytes = await f.arrayBuffer();
+      origSize = f.size;
+      fileName = f.name.replace(/\.pdf$/i, "") || "document";
+      dz.classList.add("hidden");
+      work.classList.remove("hidden");
+      toast("Loaded " + f.name, "ok");
+    },
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    pdfBytes = null; work.classList.add("hidden"); resultArea.innerHTML = ""; dz.classList.remove("hidden");
+  });
+
+  document.getElementById("compBtn").addEventListener("click", async () => {
+    if (!pdfBytes) return;
+    const lvl = LEVELS[document.getElementById("levelSel").value] || LEVELS.balanced;
+    work.classList.add("hidden");
+    loading.classList.remove("hidden");
+    resultArea.innerHTML = "";
+    try {
+      const pdf = await pdfjsLib.getDocument({ data: pdfBytes.slice(0) }).promise;
+      const { PDFDocument } = window.PDFLib;
+      const out = await PDFDocument.create();
+      for (let n = 1; n <= pdf.numPages; n++) {
+        const page = await pdf.getPage(n);
+        const pt = page.getViewport({ scale: 1.0 });       // page size in points
+        const render = page.getViewport({ scale: lvl.scale }); // raster resolution
+        const canvas = document.createElement("canvas");
+        canvas.width = render.width; canvas.height = render.height;
+        await page.render({ canvasContext: canvas.getContext("2d"), viewport: render }).promise;
+        const jpg = await canvasToBytes(canvas, lvl.quality);
+        const img = await out.embedJpg(jpg);
+        const p = out.addPage([pt.width, pt.height]);
+        p.drawImage(img, { x: 0, y: 0, width: pt.width, height: pt.height });
+      }
+      const result = await out.save();
+      const newSize = result.byteLength;
+      const saved = origSize > 0 ? Math.max(0, Math.round((1 - newSize / origSize) * 100)) : 0;
+      loading.classList.add("hidden");
+      resultArea.innerHTML =
+        '<div class="result-box"><h3>✓ Compression done</h3>' +
+        '<p class="stat">Before: <b>' + fmtSize(origSize) + '</b> → After: <b>' + fmtSize(newSize) + '</b>' +
+        '<br>You saved <b>' + saved + '%</b>' + (saved <= 0 ? ' (already well optimised)' : '') + '.</p>' +
+        '<button class="btn coral" id="dl">Download compressed.pdf</button>' +
+        ' <button class="btn ghost" id="again">Compress another</button></div>';
+      document.getElementById("dl").addEventListener("click", () => downloadBytes(result, fileName + "-compressed.pdf", "application/pdf"));
+      document.getElementById("again").addEventListener("click", () => {
+        pdfBytes = null; resultArea.innerHTML = ""; dz.classList.remove("hidden");
+      });
+      toast("Saved " + saved + "%", "ok");
+    } catch (e) {
+      console.error(e);
+      loading.classList.add("hidden");
+      work.classList.remove("hidden");
+      toast("Could not compress: " + e.message, "err");
+    }
+  });
+})();
+</script>
+</body>
+</html>

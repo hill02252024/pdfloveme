@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://pdfloveme.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://pdfloveme.com/pages/merge.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://pdfloveme.com/pages/split.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://pdfloveme.com/pages/rotate.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://pdfloveme.com/pages/delete-pages.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://pdfloveme.com/pages/jpg-to-pdf.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://pdfloveme.com/pages/pdf-to-jpg.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://pdfloveme.com/pages/encrypt.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://pdfloveme.com/pages/compress.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://pdfloveme.com/pages/about.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://pdfloveme.com/pages/contact.html</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://pdfloveme.com/pages/privacy.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://pdfloveme.com/pages/terms.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://pdfloveme.com/blog/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://pdfloveme.com/blog/how-to-password-protect-a-pdf-without-locking-yourself-out.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://pdfloveme.com/blog/extract-pages-from-pdf-without-breaking-layout.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://pdfloveme.com/blog/how-to-sign-a-pdf-without-printing.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://pdfloveme.com/blog/scanned-pdfs-searchable-ocr-guide.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://pdfloveme.com/blog/why-pdfs-break-at-worst-time.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://pdfloveme.com/blog/merge-pdf-files-without-making-a-mess.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://pdfloveme.com/blog/send-large-pdf-files-easily.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://pdfloveme.com/blog/why-your-pdf-form-wont-work-and-how-to-fix-it.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://pdfloveme.com/blog/how-to-edit-a-pdf-without-paying-for-expensive-software.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://pdfloveme.com/blog/how-to-compress-a-pdf-without-ruining-quality.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+</urlset>

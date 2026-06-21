@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JPG to PDF — PDFLoveMe</title>
+<meta name="description" content="Convert JPG and PNG images into a single PDF. Choose page size and margins. Runs entirely in your browser — files never leave your device.">
+<link rel="canonical" href="https://pdfloveme.com/pages/jpg-to-pdf.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<!-- AdSense loader temporarily disabled (fake ad placeholder in use). Restore when approved:
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/index.html">PDF<span class="heart">♥</span>Me</a>
+    <nav class="nav">
+      <a href="/index.html#tools">Tools</a>
+      <a href="/index.html#how">How it works</a>
+      <a href="/index.html#faq">FAQ</a>
+      <a href="/blog/index.html">Blog</a>
+      <a href="/pages/about.html">About</a>
+      <a href="/pages/contact.html">Contact</a>
+      <a class="btn coral sm" href="/index.html#tools">Open a tool</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main class="tool-page">
+  <div class="wrap">
+    <!-- FAKE ad placeholder (temporary) — shows where a leaderboard ad will appear. -->
+    <div class="ad-slot ad-banner" style="margin:0 0 8px;">
+      <div>
+        <div class="ad-label">Advertisement</div>
+        <div class="ad-placeholder ad-ph-leaderboard">AD · 728×90</div>
+      </div>
+    </div>
+    <div class="crumb"><a href="../index.html">Home</a> / <a href="../index.html#tools">Tools</a> / JPG to PDF</div>
+    <div class="tool-hero">
+      <div class="ico">🖼️</div>
+      <h1>JPG to PDF</h1>
+      <p>Turn JPG and PNG images into one PDF. Drag to reorder, pick a page size and margin.</p>
+    </div>
+
+    <div class="panel">
+      <div class="dropzone" id="dz" tabindex="0" role="button" aria-label="Add images">
+        <div class="dz-ico">🖼️</div>
+        <h3>Drop JPG / PNG images here</h3>
+        <p>or <span class="browse">browse</span></p>
+      </div>
+      <input type="file" id="fileInput" accept="image/jpeg,image/png,.jpg,.jpeg,.png" multiple hidden>
+      <p class="hint">Files are processed locally and never uploaded.</p>
+
+      <ul class="file-list" id="fileList"></ul>
+
+      <div class="controls">
+        <div class="field">
+          <label for="sizeSel">Page size</label>
+          <select id="sizeSel">
+            <option value="fit">Fit to image</option>
+            <option value="a4">A4 (portrait)</option>
+            <option value="letter">Letter (portrait)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="marginSel">Margin</label>
+          <select id="marginSel">
+            <option value="0">None</option>
+            <option value="18">Small</option>
+            <option value="36" selected>Medium</option>
+            <option value="54">Large</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn coral" id="makeBtn" disabled>Create PDF</button>
+        <button class="btn ghost" id="clearBtn" disabled>Clear all</button>
+      </div>
+
+      <div id="resultArea"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap"><div class="footer-bottom"><span>© 2026 PDFLoveMe</span><a href="../index.html">Back to home</a></div></div>
+</footer>
+
+<script src="../js/app.js"></script>
+<script>
+(function () {
+  const { setupDropzone, renderFileList, validateBatch, toast, downloadBytes } = window.PDFLove;
+  let files = [];
+  const SIZES = { a4: [595.28, 841.89], letter: [612, 792] };
+  const dz = document.getElementById("dz");
+  const input = document.getElementById("fileInput");
+  const listEl = document.getElementById("fileList");
+  const makeBtn = document.getElementById("makeBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const resultArea = document.getElementById("resultArea");
+
+  function refresh() {
+    renderFileList(listEl, files, {
+      draggable: true,
+      onRemove: (i) => { files.splice(i, 1); refresh(); },
+      onReorder: (from, to) => { const [m] = files.splice(from, 1); files.splice(to, 0, m); refresh(); },
+    });
+    makeBtn.disabled = files.length === 0;
+    clearBtn.disabled = files.length === 0;
+  }
+
+  setupDropzone(dz, input, {
+    accept: ["jpg", "jpeg", "png"],
+    onFiles: (incoming) => {
+      const res = validateBatch(files.length, incoming, ["jpg", "jpeg", "png"]);
+      if (!res.ok) { toast(res.reason, "err"); return; }
+      files = files.concat(res.accepted);
+      resultArea.innerHTML = "";
+      refresh();
+    },
+  });
+
+  clearBtn.addEventListener("click", () => { files = []; resultArea.innerHTML = ""; refresh(); });
+
+  makeBtn.addEventListener("click", async () => {
+    if (!files.length) return;
+    makeBtn.disabled = true; const orig = makeBtn.innerHTML;
+    makeBtn.innerHTML = '<span class="spinner"></span> Building…';
+    try {
+      const { PDFDocument } = window.PDFLib;
+      const doc = await PDFDocument.create();
+      const sizeMode = document.getElementById("sizeSel").value;
+      const margin = parseFloat(document.getElementById("marginSel").value) || 0;
+
+      for (const f of files) {
+        const bytes = await f.arrayBuffer();
+        const isPng = (f.type || "").includes("png") || f.name.toLowerCase().endsWith(".png");
+        const img = isPng ? await doc.embedPng(bytes) : await doc.embedJpg(bytes);
+
+        let pw, ph;
+        if (sizeMode === "fit") {
+          pw = img.width + margin * 2;
+          ph = img.height + margin * 2;
+        } else {
+          [pw, ph] = SIZES[sizeMode];
+        }
+        const page = doc.addPage([pw, ph]);
+        const availW = pw - margin * 2, availH = ph - margin * 2;
+        const scale = Math.min(availW / img.width, availH / img.height, 1) || (availW / img.width);
+        const drawW = img.width * (sizeMode === "fit" ? 1 : scale);
+        const drawH = img.height * (sizeMode === "fit" ? 1 : scale);
+        page.drawImage(img, {
+          x: (pw - drawW) / 2,
+          y: (ph - drawH) / 2,
+          width: drawW,
+          height: drawH,
+        });
+      }
+      const result = await doc.save();
+      resultArea.innerHTML =
+        '<div class="result-box"><h3>✓ PDF created</h3>' +
+        '<p class="stat"><b>' + files.length + '</b> images → <b>' + files.length + '</b> pages (' +
+        (sizeMode === "fit" ? "fit to image" : sizeMode.toUpperCase()) + ').</p>' +
+        '<button class="btn coral" id="dl">Download images.pdf</button></div>';
+      document.getElementById("dl").addEventListener("click", () => downloadBytes(result, "images.pdf", "application/pdf"));
+      toast("PDF ready!", "ok");
+    } catch (e) {
+      console.error(e);
+      toast("Could not create PDF: " + e.message, "err");
+    } finally {
+      makeBtn.innerHTML = orig; makeBtn.disabled = files.length === 0;
+    }
+  });
+})();
+</script>
+</body>
+</html>

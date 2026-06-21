@@ -1,0 +1,12 @@
+# OS
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# local test assets (kept outside the repo, never deploy)
+test-assets/
+/test-assets
+
+# editor/tooling
+.vscode/
+*.log
