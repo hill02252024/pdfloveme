@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add Watermark to PDF — PDFLoveMe</title>
+<meta name="description" content="Add a text or image watermark to every page of a PDF — control position, opacity, size, rotation and colour. Runs entirely in your browser.">
+<link rel="canonical" href="https://pdfloveme.com/pages/watermark.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<!-- AdSense loader temporarily disabled (fake ad placeholder in use). Restore when approved:
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/index.html">PDF<span class="heart">♥</span>Me</a>
+    <nav class="nav">
+      <a href="/index.html#tools">Tools</a>
+      <a href="/index.html#how">How it works</a>
+      <a href="/index.html#faq">FAQ</a>
+      <a href="/blog/index.html">Blog</a>
+      <a href="/pages/about.html">About</a>
+      <a href="/pages/contact.html">Contact</a>
+      <a class="btn coral sm" href="/index.html#tools">Open a tool</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main class="tool-page">
+  <div class="wrap">
+    <div class="ad-slot ad-banner" style="margin:0 0 8px;">
+      <div>
+        <div class="ad-label">Advertisement</div>
+        <div class="ad-placeholder ad-ph-leaderboard">AD · 728×90</div>
+      </div>
+    </div>
+    <div class="crumb"><a href="../index.html">Home</a> / <a href="../index.html#tools">Tools</a> / Watermark PDF</div>
+    <div class="tool-hero">
+      <div class="ico">💧</div>
+      <h1>Add Watermark</h1>
+      <p>Stamp text or an image across every page. Adjust it, preview page one, then apply.</p>
+    </div>
+
+    <div class="panel" style="max-width:1000px;">
+      <div class="dropzone" id="dz" tabindex="0" role="button" aria-label="Add a PDF file">
+        <div class="dz-ico">📄</div>
+        <h3>Drop a PDF here</h3>
+        <p>or <span class="browse">browse</span></p>
+      </div>
+      <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden>
+      <p class="hint">Files are processed locally and never uploaded.</p>
+
+      <div id="work" class="hidden">
+        <div class="tabs">
+          <button class="btn ghost sm active" id="tabText">Text</button>
+          <button class="btn ghost sm" id="tabImage">Image</button>
+        </div>
+
+        <div id="textOpts">
+          <div class="controls">
+            <div class="field" style="flex:1;min-width:240px;">
+              <label for="wmText">Watermark text</label>
+              <input type="text" id="wmText" value="CONFIDENTIAL">
+            </div>
+            <div class="field">
+              <label for="wmColor">Colour</label>
+              <input type="color" id="wmColor" value="#ff5d52" style="min-width:60px;padding:4px;height:42px;">
+            </div>
+          </div>
+        </div>
+
+        <div id="imageOpts" class="hidden">
+          <div class="controls">
+            <div class="field">
+              <label>Watermark image (PNG/JPG)</label>
+              <input type="file" id="wmImg" accept="image/png,image/jpeg,.png,.jpg,.jpeg">
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="field">
+            <label for="wmPos">Position</label>
+            <select id="wmPos">
+              <option value="center">Centre</option>
+              <option value="tile">Tile (repeat)</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="wmOpacity">Opacity: <span id="opacityVal">30%</span></label>
+            <input type="range" id="wmOpacity" min="5" max="100" value="30">
+          </div>
+          <div class="field" id="sizeField">
+            <label for="wmSize">Size: <span id="sizeVal">48</span></label>
+            <input type="range" id="wmSize" min="10" max="160" value="48">
+          </div>
+          <div class="field">
+            <label for="wmRot">Rotation: <span id="rotVal">45°</span></label>
+            <input type="range" id="wmRot" min="-90" max="90" value="45">
+          </div>
+        </div>
+        <div class="controls hidden" id="customXY">
+          <div class="field"><label for="wmX">X: <span id="xVal">50%</span></label><input type="range" id="wmX" min="0" max="100" value="50"></div>
+          <div class="field"><label for="wmY">Y: <span id="yVal">50%</span></label><input type="range" id="wmY" min="0" max="100" value="50"></div>
+        </div>
+
+        <div class="stage-wrap"><div class="stage" id="stage"><canvas id="pv"></canvas><div id="ovl" style="position:absolute;inset:0;overflow:hidden;pointer-events:none;"></div></div></div>
+        <p class="hint">Live preview of page 1 (approximate). The real watermark is applied to every page on save.</p>
+
+        <div class="actions">
+          <button class="btn coral" id="applyBtn">Apply &amp; download</button>
+          <button class="btn ghost" id="resetBtn">Use another file</button>
+        </div>
+      </div>
+
+      <div id="loading" class="hidden"><div class="loading-row"><span class="spinner dark"></span> Working…</div></div>
+      <div id="resultArea"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap"><div class="footer-bottom"><span>© 2026 PDFLoveMe</span><a href="../index.html">Back to home</a></div></div>
+</footer>
+
+<script src="../js/app.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+(function () {
+  const { setupDropzone, validateFile, toast, downloadBytes } = window.PDFLove;
+  let pdfBytes = null, mode = "text", wmImgBytes = null, wmImgType = null, wmImgURL = null;
+  const $ = (id) => document.getElementById(id);
+  const pv = $("pv"), ovl = $("ovl");
+
+  function hexToRgb(h){const m=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h);return m?{r:parseInt(m[1],16)/255,g:parseInt(m[2],16)/255,b:parseInt(m[3],16)/255}:{r:1,g:0,b:0};}
+
+  function renderPreviewOverlay() {
+    ovl.innerHTML = "";
+    const op = (+$("wmOpacity").value)/100;
+    const rot = +$("wmRot").value;
+    const pos = $("wmPos").value;
+    const W = pv.clientWidth, H = pv.clientHeight;
+    if (!W) return;
+    const make = () => {
+      const el = document.createElement("div");
+      el.style.position="absolute"; el.style.opacity=op;
+      el.style.transform="translate(-50%,-50%) rotate("+(-rot)+"deg)";
+      el.style.transformOrigin="center";
+      if (mode==="text") {
+        el.textContent = $("wmText").value || " ";
+        el.style.color = $("wmColor").value;
+        el.style.fontFamily = "Inter, sans-serif";
+        el.style.fontWeight = "700";
+        el.style.whiteSpace = "nowrap";
+        el.style.fontSize = ((+$("wmSize").value) * (W / (pv.width||W))) + "px";
+      } else if (wmImgURL) {
+        const im = document.createElement("img");
+        im.src = wmImgURL; im.style.width = ((+$("wmSize").value)*2) + "px"; el.appendChild(im);
+      }
+      return el;
+    };
+    if (pos==="tile") {
+      const step = Math.max(90, (+$("wmSize").value)*2.4);
+      for (let y=step/2; y<H; y+=step) for (let x=step/2; x<W; x+=step){
+        const e=make(); e.style.left=x+"px"; e.style.top=y+"px"; ovl.appendChild(e);
+      }
+    } else {
+      const e=make();
+      const x = pos==="custom" ? (+$("wmX").value)/100*W : W/2;
+      const y = pos==="custom" ? (+$("wmY").value)/100*H : H/2;
+      e.style.left=x+"px"; e.style.top=y+"px"; ovl.appendChild(e);
+    }
+  }
+
+  async function loadPreview() {
+    const pdf = await pdfjsLib.getDocument({ data: pdfBytes.slice(0) }).promise;
+    const page = await pdf.getPage(1);
+    const viewport = page.getViewport({ scale: 1.2 });
+    pv.width = viewport.width; pv.height = viewport.height;
+    await page.render({ canvasContext: pv.getContext("2d"), viewport }).promise;
+    renderPreviewOverlay();
+  }
+
+  // option wiring
+  ["wmText","wmColor","wmPos","wmOpacity","wmSize","wmRot","wmX","wmY"].forEach(id=>{
+    $(id).addEventListener("input", ()=>{
+      $("opacityVal").textContent=$("wmOpacity").value+"%";
+      $("sizeVal").textContent=$("wmSize").value;
+      $("rotVal").textContent=$("wmRot").value+"°";
+      $("xVal").textContent=$("wmX").value+"%"; $("yVal").textContent=$("wmY").value+"%";
+      $("customXY").classList.toggle("hidden", $("wmPos").value!=="custom");
+      renderPreviewOverlay();
+    });
+  });
+  $("tabText").addEventListener("click",()=>{mode="text";$("tabText").classList.add("active");$("tabImage").classList.remove("active");$("textOpts").classList.remove("hidden");$("imageOpts").classList.add("hidden");renderPreviewOverlay();});
+  $("tabImage").addEventListener("click",()=>{mode="image";$("tabImage").classList.add("active");$("tabText").classList.remove("active");$("imageOpts").classList.remove("hidden");$("textOpts").classList.add("hidden");renderPreviewOverlay();});
+  $("wmImg").addEventListener("change", async ()=>{
+    const f=$("wmImg").files[0]; if(!f) return;
+    wmImgBytes = await f.arrayBuffer();
+    wmImgType = (f.type.includes("png")||f.name.toLowerCase().endsWith(".png")) ? "png":"jpg";
+    if (wmImgURL) URL.revokeObjectURL(wmImgURL);
+    wmImgURL = URL.createObjectURL(new Blob([wmImgBytes]));
+    renderPreviewOverlay();
+  });
+
+  setupDropzone(dz=$("dz"), $("fileInput"), {
+    accept:["pdf"],
+    onFiles: async (incoming)=>{
+      const f=incoming[0]; const v=validateFile(f,["pdf"]);
+      if(!v.ok){toast(v.reason,"err");return;}
+      $("resultArea").innerHTML=""; $("dz").classList.add("hidden"); $("loading").classList.remove("hidden");
+      try { pdfBytes = await f.arrayBuffer(); await loadPreview();
+        $("loading").classList.add("hidden"); $("work").classList.remove("hidden");
+      } catch(e){ console.error(e); toast("Could not read PDF: "+e.message,"err"); $("loading").classList.add("hidden"); $("dz").classList.remove("hidden"); }
+    }
+  });
+
+  $("resetBtn").addEventListener("click", ()=>{ pdfBytes=null; $("work").classList.add("hidden"); $("resultArea").innerHTML=""; $("dz").classList.remove("hidden"); });
+
+  $("applyBtn").addEventListener("click", async ()=>{
+    if(!pdfBytes) return;
+    if (mode==="image" && !wmImgBytes){ toast("Choose a watermark image first.","err"); return; }
+    if (mode==="text" && !$("wmText").value.trim()){ toast("Enter watermark text.","err"); return; }
+    const btn=$("applyBtn"); btn.disabled=true; const o=btn.innerHTML; btn.innerHTML='<span class="spinner"></span> Applying…';
+    try {
+      const { PDFDocument, StandardFonts, degrees, rgb } = window.PDFLib;
+      const doc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+      const op = (+$("wmOpacity").value)/100;
+      const rot = +$("wmRot").value;
+      const pos = $("wmPos").value;
+      const size = +$("wmSize").value;
+      let font=null, embImg=null, imgDims=null;
+      if (mode==="text") font = await doc.embedFont(StandardFonts.HelveticaBold);
+      else { embImg = wmImgType==="png" ? await doc.embedPng(wmImgBytes) : await doc.embedJpg(wmImgBytes);
+             const scale=(size*2)/embImg.width; imgDims={w:embImg.width*scale,h:embImg.height*scale}; }
+      const c = hexToRgb($("wmColor").value);
+      doc.getPages().forEach((page)=>{
+        const W=page.getWidth(), H=page.getHeight();
+        const drawOne=(cx,cy)=>{
+          if (mode==="text"){
+            const txt=$("wmText").value;
+            const tw=font.widthOfTextAtSize(txt,size), th=size;
+            page.drawText(txt,{x:cx-tw/2,y:cy-th/3,size,font,color:rgb(c.r,c.g,c.b),opacity:op,rotate:degrees(rot)});
+          } else {
+            page.drawImage(embImg,{x:cx-imgDims.w/2,y:cy-imgDims.h/2,width:imgDims.w,height:imgDims.h,opacity:op,rotate:degrees(rot)});
+          }
+        };
+        if (pos==="tile"){
+          const step=Math.max(120,size*3.2);
+          for(let y=step/2;y<H;y+=step) for(let x=step/2;x<W;x+=step) drawOne(x,y);
+        } else if (pos==="custom"){
+          drawOne((+$("wmX").value)/100*W, H-(+$("wmY").value)/100*H);
+        } else { drawOne(W/2,H/2); }
+      });
+      const result = await doc.save();
+      $("resultArea").innerHTML='<div class="result-box"><h3>✓ Watermark added</h3><p class="stat">Applied to all <b>'+doc.getPageCount()+'</b> pages.</p><button class="btn coral" id="dl">Download watermarked.pdf</button></div>';
+      $("dl").addEventListener("click", ()=>downloadBytes(result,"watermarked.pdf","application/pdf"));
+      toast("Done!","ok");
+    } catch(e){ console.error(e); toast("Could not apply watermark: "+e.message,"err"); }
+    finally { btn.innerHTML=o; btn.disabled=false; }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crop PDF — PDFLoveMe</title>
+<meta name="description" content="Crop PDF pages by dragging a selection box. Apply to all pages or a range. Runs entirely in your browser — files never leave your device.">
+<link rel="canonical" href="https://pdfloveme.com/pages/crop.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<!-- AdSense loader temporarily disabled (fake ad placeholder in use). Restore when approved:
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/index.html">PDF<span class="heart">♥</span>Me</a>
+    <nav class="nav">
+      <a href="/index.html#tools">Tools</a>
+      <a href="/index.html#how">How it works</a>
+      <a href="/index.html#faq">FAQ</a>
+      <a href="/blog/index.html">Blog</a>
+      <a href="/pages/about.html">About</a>
+      <a href="/pages/contact.html">Contact</a>
+      <a class="btn coral sm" href="/index.html#tools">Open a tool</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main class="tool-page">
+  <div class="wrap">
+    <div class="ad-slot ad-banner" style="margin:0 0 8px;">
+      <div>
+        <div class="ad-label">Advertisement</div>
+        <div class="ad-placeholder ad-ph-leaderboard">AD · 728×90</div>
+      </div>
+    </div>
+    <div class="crumb"><a href="../index.html">Home</a> / <a href="../index.html#tools">Tools</a> / Crop PDF</div>
+    <div class="tool-hero">
+      <div class="ico">⬚</div>
+      <h1>Crop PDF</h1>
+      <p>Drag a box over the area you want to keep. Apply it to every page or a chosen range.</p>
+    </div>
+
+    <div class="panel" style="max-width:1000px;">
+      <div class="dropzone" id="dz" tabindex="0" role="button" aria-label="Add a PDF file">
+        <div class="dz-ico">📄</div>
+        <h3>Drop a PDF here</h3>
+        <p>or <span class="browse">browse</span></p>
+      </div>
+      <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden>
+      <p class="hint">Files are processed locally and never uploaded.</p>
+
+      <div id="work" class="hidden">
+        <p class="hint">Drag on the page below to select the area to <b>keep</b>. Drag again to redo.</p>
+        <div class="stage-wrap"><div class="stage" id="stage"><canvas id="pv"></canvas></div></div>
+
+        <div class="controls">
+          <div class="field">
+            <label for="applyTo">Apply to</label>
+            <select id="applyTo">
+              <option value="all">All pages</option>
+              <option value="range">Page range…</option>
+            </select>
+          </div>
+          <div class="field hidden" id="rangeField">
+            <label for="range">Range (e.g. 1-3,5)</label>
+            <input type="text" id="range" placeholder="1-3,5" style="min-width:160px;">
+          </div>
+          <div class="field" style="align-self:center;">
+            <span id="selInfo" style="font-size:13px;color:var(--muted);">No selection yet</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn coral" id="applyBtn" disabled>Crop &amp; download</button>
+          <button class="btn ghost" id="resetSel">Reset selection</button>
+          <button class="btn ghost" id="resetBtn">Use another file</button>
+        </div>
+      </div>
+
+      <div id="loading" class="hidden"><div class="loading-row"><span class="spinner dark"></span> Working…</div></div>
+      <div id="resultArea"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap"><div class="footer-bottom"><span>© 2026 PDFLoveMe</span><a href="../index.html">Back to home</a></div></div>
+</footer>
+
+<script src="../js/app.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+(function () {
+  const { setupDropzone, validateFile, toast, downloadBytes } = window.PDFLove;
+  let pdfBytes=null, pageCount=0;
+  let sel=null; // fractions {l,t,w,h} of page (0..1) from top-left
+  const $=(id)=>document.getElementById(id);
+  const stage=$("stage"), pv=$("pv");
+  let rectEl=null, drag=null;
+
+  function showRect(){
+    if(!sel) return;
+    if(!rectEl){ rectEl=document.createElement("div"); rectEl.className="crop-rect"; stage.appendChild(rectEl); }
+    const W=pv.clientWidth, H=pv.clientHeight;
+    rectEl.style.left=(sel.l*W)+"px"; rectEl.style.top=(sel.t*H)+"px";
+    rectEl.style.width=(sel.w*W)+"px"; rectEl.style.height=(sel.h*H)+"px";
+    $("selInfo").textContent="Keeping "+Math.round(sel.w*100)+"% × "+Math.round(sel.h*100)+"% of the page";
+    $("applyBtn").disabled = sel.w<0.02 || sel.h<0.02;
+  }
+  function clearRect(){ if(rectEl){rectEl.remove();rectEl=null;} sel=null; $("selInfo").textContent="No selection yet"; $("applyBtn").disabled=true; }
+
+  function relPos(e){
+    const r=pv.getBoundingClientRect();
+    const cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    const cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+    return { x:Math.max(0,Math.min(r.width,cx))/r.width, y:Math.max(0,Math.min(r.height,cy))/r.height };
+  }
+  function startDraw(e){ e.preventDefault(); const p=relPos(e); drag={x0:p.x,y0:p.y}; }
+  function moveDraw(e){ if(!drag) return; e.preventDefault(); const p=relPos(e);
+    sel={ l:Math.min(drag.x0,p.x), t:Math.min(drag.y0,p.y), w:Math.abs(p.x-drag.x0), h:Math.abs(p.y-drag.y0) };
+    showRect();
+  }
+  function endDraw(){ drag=null; }
+  stage.addEventListener("mousedown",startDraw); window.addEventListener("mousemove",moveDraw); window.addEventListener("mouseup",endDraw);
+  stage.addEventListener("touchstart",startDraw,{passive:false}); window.addEventListener("touchmove",moveDraw,{passive:false}); window.addEventListener("touchend",endDraw);
+
+  $("applyTo").addEventListener("change", ()=> $("rangeField").classList.toggle("hidden", $("applyTo").value!=="range"));
+  $("resetSel").addEventListener("click", clearRect);
+
+  function parseRange(str,max){ const set=new Set(); str.split(",").forEach(p=>{p=p.trim();const m=p.match(/^(\d+)\s*-\s*(\d+)$/);
+    if(m){let a=+m[1],b=+m[2];if(a>b)[a,b]=[b,a];for(let i=a;i<=b;i++)if(i>=1&&i<=max)set.add(i-1);}
+    else if(/^\d+$/.test(p)){const i=+p;if(i>=1&&i<=max)set.add(i-1);}}); return set; }
+
+  async function loadPreview(){
+    const pdf=await pdfjsLib.getDocument({data:pdfBytes.slice(0)}).promise;
+    pageCount=pdf.numPages;
+    const page=await pdf.getPage(1);
+    const viewport=page.getViewport({scale:1.3});
+    pv.width=viewport.width; pv.height=viewport.height;
+    await page.render({canvasContext:pv.getContext("2d"),viewport}).promise;
+    clearRect();
+  }
+
+  setupDropzone($("dz"), $("fileInput"), {
+    accept:["pdf"],
+    onFiles: async (incoming)=>{
+      const f=incoming[0]; const v=validateFile(f,["pdf"]);
+      if(!v.ok){toast(v.reason,"err");return;}
+      $("resultArea").innerHTML=""; $("dz").classList.add("hidden"); $("loading").classList.remove("hidden");
+      try{ pdfBytes=await f.arrayBuffer(); await loadPreview();
+        $("loading").classList.add("hidden"); $("work").classList.remove("hidden");
+      }catch(e){console.error(e);toast("Could not read PDF: "+e.message,"err");$("loading").classList.add("hidden");$("dz").classList.remove("hidden");}
+    }
+  });
+
+  $("resetBtn").addEventListener("click", ()=>{ pdfBytes=null; clearRect(); $("work").classList.add("hidden"); $("resultArea").innerHTML=""; $("dz").classList.remove("hidden"); });
+
+  $("applyBtn").addEventListener("click", async ()=>{
+    if(!sel){ toast("Drag a selection box first.","err"); return; }
+    const btn=$("applyBtn"); btn.disabled=true; const o=btn.innerHTML; btn.innerHTML='<span class="spinner"></span> Cropping…';
+    try{
+      const { PDFDocument } = window.PDFLib;
+      const doc=await PDFDocument.load(pdfBytes,{ignoreEncryption:true});
+      const pages=doc.getPages();
+      let targets;
+      if($("applyTo").value==="range"){ targets=parseRange($("range").value,pages.length); if(!targets.size){toast("Enter a valid range like 1-3,5","err");btn.innerHTML=o;btn.disabled=false;return;} }
+      else { targets=new Set(pages.map((_,i)=>i)); }
+      pages.forEach((page,i)=>{
+        if(!targets.has(i)) return;
+        const W=page.getWidth(), H=page.getHeight();
+        const box=page.getCropBox ? page.getCropBox() : {x:0,y:0,width:W,height:H};
+        const x = box.x + sel.l*W;
+        const yTop = sel.t*H;
+        const cw = sel.w*W, ch = sel.h*H;
+        const y = box.y + (H - yTop - ch);
+        page.setCropBox(x, y, cw, ch);
+      });
+      const result=await doc.save();
+      $("resultArea").innerHTML='<div class="result-box"><h3>✓ Cropped</h3><p class="stat">Applied crop to <b>'+targets.size+'</b> page(s).</p><button class="btn coral" id="dl">Download cropped.pdf</button></div>';
+      $("dl").addEventListener("click", ()=>downloadBytes(result,"cropped.pdf","application/pdf"));
+      toast("Done!","ok");
+    }catch(e){console.error(e);toast("Could not crop: "+e.message,"err");}
+    finally{btn.innerHTML=o;btn.disabled=false;}
+  });
+})();
+</script>
+</body>
+</html>

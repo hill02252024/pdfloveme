@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add Page Numbers to PDF — PDFLoveMe</title>
+<meta name="description" content="Add page numbers to a PDF — choose position, start number, size and format (1, 1/10, Page 1). Runs entirely in your browser.">
+<link rel="canonical" href="https://pdfloveme.com/pages/page-numbers.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<!-- AdSense loader temporarily disabled (fake ad placeholder in use). Restore when approved:
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/index.html">PDF<span class="heart">♥</span>Me</a>
+    <nav class="nav">
+      <a href="/index.html#tools">Tools</a>
+      <a href="/index.html#how">How it works</a>
+      <a href="/index.html#faq">FAQ</a>
+      <a href="/blog/index.html">Blog</a>
+      <a href="/pages/about.html">About</a>
+      <a href="/pages/contact.html">Contact</a>
+      <a class="btn coral sm" href="/index.html#tools">Open a tool</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main class="tool-page">
+  <div class="wrap">
+    <div class="ad-slot ad-banner" style="margin:0 0 8px;">
+      <div>
+        <div class="ad-label">Advertisement</div>
+        <div class="ad-placeholder ad-ph-leaderboard">AD · 728×90</div>
+      </div>
+    </div>
+    <div class="crumb"><a href="../index.html">Home</a> / <a href="../index.html#tools">Tools</a> / Page Numbers</div>
+    <div class="tool-hero">
+      <div class="ico">🔢</div>
+      <h1>Add Page Numbers</h1>
+      <p>Stamp page numbers onto your PDF — pick the position, start number and format.</p>
+    </div>
+
+    <div class="panel" style="max-width:1000px;">
+      <div class="dropzone" id="dz" tabindex="0" role="button" aria-label="Add a PDF file">
+        <div class="dz-ico">📄</div>
+        <h3>Drop a PDF here</h3>
+        <p>or <span class="browse">browse</span></p>
+      </div>
+      <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden>
+      <p class="hint">Files are processed locally and never uploaded.</p>
+
+      <div id="work" class="hidden">
+        <div class="controls">
+          <div class="field">
+            <label for="pos">Position</label>
+            <select id="pos">
+              <option value="bc">Footer · centre</option>
+              <option value="bl">Footer · left</option>
+              <option value="br">Footer · right</option>
+              <option value="tc">Header · centre</option>
+              <option value="tl">Header · left</option>
+              <option value="tr">Header · right</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fmt">Format</label>
+            <select id="fmt">
+              <option value="n">1</option>
+              <option value="nofN">1 / 10</option>
+              <option value="pageN">Page 1</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="start">Start at</label>
+            <input type="number" id="start" value="1" min="0" style="min-width:90px;">
+          </div>
+          <div class="field">
+            <label for="size">Font size</label>
+            <input type="number" id="size" value="11" min="6" max="48" style="min-width:90px;">
+          </div>
+        </div>
+
+        <div class="stage-wrap"><div class="stage" id="stage"><canvas id="pv"></canvas><div id="ovl" style="position:absolute;inset:0;pointer-events:none;"></div></div></div>
+        <p class="hint">Preview of page 1. Numbering is applied to every page on save.</p>
+
+        <div class="actions">
+          <button class="btn coral" id="applyBtn">Apply &amp; download</button>
+          <button class="btn ghost" id="resetBtn">Use another file</button>
+        </div>
+      </div>
+
+      <div id="loading" class="hidden"><div class="loading-row"><span class="spinner dark"></span> Working…</div></div>
+      <div id="resultArea"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap"><div class="footer-bottom"><span>© 2026 PDFLoveMe</span><a href="../index.html">Back to home</a></div></div>
+</footer>
+
+<script src="../js/app.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+(function () {
+  const { setupDropzone, validateFile, toast, downloadBytes } = window.PDFLove;
+  let pdfBytes = null, pageCount = 0;
+  const $=(id)=>document.getElementById(id);
+  const pv=$("pv"), ovl=$("ovl");
+  const MARGIN = 28; // points from edge
+
+  function label(i){
+    const fmt=$("fmt").value, start=parseInt($("start").value,10)||0, num=start+i;
+    if(fmt==="nofN") return num+" / "+(start+pageCount-1);
+    if(fmt==="pageN") return "Page "+num;
+    return ""+num;
+  }
+  function previewLabel(){ return label(0); }
+
+  function drawPreview(){
+    ovl.innerHTML="";
+    if(!pv.clientWidth) return;
+    const el=document.createElement("div");
+    el.textContent=previewLabel();
+    el.style.position="absolute";
+    el.style.fontFamily="Helvetica, Inter, sans-serif";
+    el.style.color="#16161d";
+    const ratio = pv.clientWidth/pv.width;
+    el.style.fontSize=((+$("size").value)*ratio*(pv.width/ (pv.clientWidth)) )+"px"; // approx -> use point size scaled
+    el.style.fontSize=((+$("size").value)*ratio)+"px";
+    const pos=$("pos").value, m=MARGIN*ratio;
+    el.style.whiteSpace="nowrap";
+    // vertical
+    if(pos[0]==="b"){ el.style.bottom=(m*0.5)+"px"; } else { el.style.top=(m*0.5)+"px"; }
+    // horizontal
+    ovl.appendChild(el);
+    const w=el.offsetWidth, full=pv.clientWidth;
+    if(pos[1]==="c"){ el.style.left=((full-w)/2)+"px"; }
+    else if(pos[1]==="l"){ el.style.left=m+"px"; }
+    else { el.style.left=(full-w-m)+"px"; }
+  }
+
+  ["pos","fmt","start","size"].forEach(id=>$(id).addEventListener("input",drawPreview));
+
+  async function loadPreview(){
+    const pdf=await pdfjsLib.getDocument({data:pdfBytes.slice(0)}).promise;
+    pageCount=pdf.numPages;
+    const page=await pdf.getPage(1);
+    const viewport=page.getViewport({scale:1.2});
+    pv.width=viewport.width; pv.height=viewport.height;
+    await page.render({canvasContext:pv.getContext("2d"),viewport}).promise;
+    drawPreview();
+  }
+
+  setupDropzone($("dz"), $("fileInput"), {
+    accept:["pdf"],
+    onFiles: async (incoming)=>{
+      const f=incoming[0]; const v=validateFile(f,["pdf"]);
+      if(!v.ok){toast(v.reason,"err");return;}
+      $("resultArea").innerHTML=""; $("dz").classList.add("hidden"); $("loading").classList.remove("hidden");
+      try{ pdfBytes=await f.arrayBuffer(); await loadPreview();
+        $("loading").classList.add("hidden"); $("work").classList.remove("hidden");
+      }catch(e){console.error(e);toast("Could not read PDF: "+e.message,"err");$("loading").classList.add("hidden");$("dz").classList.remove("hidden");}
+    }
+  });
+
+  $("resetBtn").addEventListener("click", ()=>{ pdfBytes=null; $("work").classList.add("hidden"); $("resultArea").innerHTML=""; $("dz").classList.remove("hidden"); });
+
+  $("applyBtn").addEventListener("click", async ()=>{
+    if(!pdfBytes) return;
+    const btn=$("applyBtn"); btn.disabled=true; const o=btn.innerHTML; btn.innerHTML='<span class="spinner"></span> Applying…';
+    try{
+      const { PDFDocument, StandardFonts, rgb } = window.PDFLib;
+      const doc=await PDFDocument.load(pdfBytes,{ignoreEncryption:true});
+      const font=await doc.embedFont(StandardFonts.Helvetica);
+      const size=+$("size").value, pos=$("pos").value;
+      const pages=doc.getPages(); pageCount=pages.length;
+      pages.forEach((page,i)=>{
+        const W=page.getWidth(), H=page.getHeight();
+        const txt=label(i);
+        const tw=font.widthOfTextAtSize(txt,size);
+        let x = pos[1]==="c" ? (W-tw)/2 : pos[1]==="l" ? MARGIN : W-tw-MARGIN;
+        let y = pos[0]==="b" ? MARGIN : H-MARGIN-size*0.8;
+        page.drawText(txt,{x,y,size,font,color:rgb(0.09,0.09,0.11)});
+      });
+      const result=await doc.save();
+      $("resultArea").innerHTML='<div class="result-box"><h3>✓ Page numbers added</h3><p class="stat">Numbered all <b>'+pageCount+'</b> pages.</p><button class="btn coral" id="dl">Download numbered.pdf</button></div>';
+      $("dl").addEventListener("click", ()=>downloadBytes(result,"numbered.pdf","application/pdf"));
+      toast("Done!","ok");
+    }catch(e){console.error(e);toast("Could not add page numbers: "+e.message,"err");}
+    finally{btn.innerHTML=o;btn.disabled=false;}
+  });
+})();
+</script>
+</body>
+</html>

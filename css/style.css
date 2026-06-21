@@ -348,3 +348,29 @@ section { padding: 64px 0; }
 /* about page */
 .about-figure { margin: 0 0 28px; }
 .about-figure img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: var(--radius); display: block; }
+
+/* ============================================================
+   INTERACTIVE TOOL STAGES (crop / sign / edit / watermark preview)
+   ============================================================ */
+.stage-wrap { display: flex; justify-content: center; margin: 20px 0; }
+.stage { position: relative; display: inline-block; line-height: 0; max-width: 100%; touch-action: none; }
+.stage canvas { display: block; max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+/* crop selection */
+.crop-rect { position: absolute; border: 2px solid var(--coral); box-shadow: 0 0 0 9999px rgba(22,22,29,.45); box-sizing: border-box; cursor: move; }
+.crop-rect .ch { position: absolute; width: 14px; height: 14px; background: #fff; border: 2px solid var(--coral); border-radius: 50%; }
+.crop-rect .ch.br { right: -8px; bottom: -8px; cursor: nwse-resize; }
+/* placed overlay items (signature, annotations) */
+.ov { position: absolute; box-sizing: border-box; cursor: move; }
+.ov img { width: 100%; height: 100%; display: block; pointer-events: none; }
+.ov .rs { position: absolute; right: -7px; bottom: -7px; width: 14px; height: 14px; background: var(--coral); border: 2px solid #fff; border-radius: 50%; cursor: nwse-resize; }
+.ov .del { position: absolute; top: -10px; right: -10px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink); color: #fff; border: 0; font-size: 12px; line-height: 1; cursor: pointer; padding: 0; }
+.ov.text { padding: 1px 3px; font-family: var(--body); white-space: pre; line-height: 1.15; overflow: hidden; }
+.ov.hl { background: rgba(255,221,51,.40); }
+.ov.box { background: #16161d; }
+.ov.line { background: transparent; border: 0; }
+/* signature pad */
+.sigpad { border: 2px dashed var(--line); border-radius: 10px; background: #fff; touch-action: none; cursor: crosshair; width: 100%; max-width: 440px; height: 170px; display: block; margin: 0 auto; }
+.tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 14px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; margin: 14px 0; }
+.toolbar .btn.active { background: var(--coral); border-color: var(--coral); color: #fff; }
+.note-line { font-size: 13px; color: #6b3a36; background: #fff7f6; border: 1px solid var(--line); border-left: 3px solid var(--coral); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 16px auto; max-width: 760px; }

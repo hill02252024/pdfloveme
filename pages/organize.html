@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Organize PDF Pages — PDFLoveMe</title>
+<meta name="description" content="Reorder and delete PDF pages by dragging thumbnails. Runs entirely in your browser — files never leave your device.">
+<link rel="canonical" href="https://pdfloveme.com/pages/organize.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<!-- AdSense loader temporarily disabled (fake ad placeholder in use). Restore when approved:
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/index.html">PDF<span class="heart">♥</span>Me</a>
+    <nav class="nav">
+      <a href="/index.html#tools">Tools</a>
+      <a href="/index.html#how">How it works</a>
+      <a href="/index.html#faq">FAQ</a>
+      <a href="/blog/index.html">Blog</a>
+      <a href="/pages/about.html">About</a>
+      <a href="/pages/contact.html">Contact</a>
+      <a class="btn coral sm" href="/index.html#tools">Open a tool</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main class="tool-page">
+  <div class="wrap">
+    <!-- FAKE ad placeholder (temporary) — shows where a leaderboard ad will appear. -->
+    <div class="ad-slot ad-banner" style="margin:0 0 8px;">
+      <div>
+        <div class="ad-label">Advertisement</div>
+        <div class="ad-placeholder ad-ph-leaderboard">AD · 728×90</div>
+      </div>
+    </div>
+    <div class="crumb"><a href="../index.html">Home</a> / <a href="../index.html#tools">Tools</a> / Organize Pages</div>
+    <div class="tool-hero">
+      <div class="ico">🔀</div>
+      <h1>Organize Pages</h1>
+      <p>Drag thumbnails to reorder, and remove the pages you don't need. Then save a clean PDF.</p>
+    </div>
+
+    <div class="panel" style="max-width:1000px;">
+      <div class="dropzone" id="dz" tabindex="0" role="button" aria-label="Add a PDF file">
+        <div class="dz-ico">📄</div>
+        <h3>Drop a PDF here</h3>
+        <p>or <span class="browse">browse</span></p>
+      </div>
+      <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden>
+      <p class="hint">Files are processed locally and never uploaded.</p>
+
+      <div id="work" class="hidden">
+        <div class="select-bar">
+          <span id="info" style="font-weight:600;align-self:center;"></span>
+          <span style="align-self:center;color:var(--muted);font-size:13px;">Drag a page to move it · click ✕ to remove</span>
+        </div>
+        <div class="preview-grid" id="grid"></div>
+        <div class="actions">
+          <button class="btn coral" id="saveBtn" disabled>Save reordered PDF</button>
+          <button class="btn ghost" id="resetBtn">Use another file</button>
+        </div>
+      </div>
+
+      <div id="loading" class="hidden"><div class="loading-row"><span class="spinner dark"></span> Rendering preview…</div></div>
+      <div id="resultArea"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap"><div class="footer-bottom"><span>© 2026 PDFLoveMe</span><a href="../index.html">Back to home</a></div></div>
+</footer>
+
+<script src="../js/app.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+(function () {
+  const { setupDropzone, validateFile, toast, downloadBytes } = window.PDFLove;
+  let pdfBytes = null, pageCount = 0;
+  let thumbs = [];     // dataURL per ORIGINAL page index
+  let order = [];      // current sequence of original indices
+  const dz = document.getElementById("dz");
+  const input = document.getElementById("fileInput");
+  const work = document.getElementById("work");
+  const grid = document.getElementById("grid");
+  const loading = document.getElementById("loading");
+  const resultArea = document.getElementById("resultArea");
+  const saveBtn = document.getElementById("saveBtn");
+  const info = document.getElementById("info");
+
+  function updateInfo() {
+    info.textContent = order.length + " of " + pageCount + " pages kept";
+    saveBtn.disabled = order.length === 0;
+  }
+
+  function renderGrid() {
+    grid.innerHTML = "";
+    order.forEach((orig, pos) => {
+      const cell = document.createElement("div");
+      cell.className = "thumb draggable";
+      cell.draggable = true;
+      cell.dataset.pos = String(pos);
+      const img = document.createElement("img");
+      img.src = thumbs[orig]; img.alt = "Page " + (orig + 1);
+      img.style.width = "100%"; img.style.display = "block";
+      cell.appendChild(img);
+      const del = document.createElement("div");
+      del.className = "pg-btns";
+      del.innerHTML = '<button title="Remove page">✕</button>';
+      cell.appendChild(del);
+      const num = document.createElement("div");
+      num.className = "pg-num"; num.textContent = (pos + 1) + " (was " + (orig + 1) + ")";
+      cell.appendChild(num);
+
+      del.querySelector("button").addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (order.length <= 1) { toast("Keep at least one page.", "err"); return; }
+        order.splice(pos, 1); renderGrid(); updateInfo();
+      });
+      cell.addEventListener("dragstart", (e) => {
+        cell.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", String(pos));
+      });
+      cell.addEventListener("dragend", () => cell.classList.remove("dragging"));
+      cell.addEventListener("dragover", (e) => e.preventDefault());
+      cell.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const from = parseInt(e.dataTransfer.getData("text/plain"), 10);
+        const to = parseInt(cell.dataset.pos, 10);
+        if (!isNaN(from) && !isNaN(to) && from !== to) {
+          const [m] = order.splice(from, 1); order.splice(to, 0, m);
+          renderGrid(); updateInfo();
+        }
+      });
+      grid.appendChild(cell);
+    });
+  }
+
+  setupDropzone(dz, input, {
+    accept: ["pdf"],
+    onFiles: async (incoming) => {
+      const f = incoming[0];
+      const v = validateFile(f, ["pdf"]);
+      if (!v.ok) { toast(v.reason, "err"); return; }
+      resultArea.innerHTML = "";
+      dz.classList.add("hidden");
+      loading.classList.remove("hidden");
+      try {
+        pdfBytes = await f.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: pdfBytes.slice(0) }).promise;
+        pageCount = pdf.numPages;
+        thumbs = []; order = [];
+        for (let n = 1; n <= pageCount; n++) {
+          const page = await pdf.getPage(n);
+          const viewport = page.getViewport({ scale: 0.4 });
+          const canvas = document.createElement("canvas");
+          canvas.width = viewport.width; canvas.height = viewport.height;
+          await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+          thumbs.push(canvas.toDataURL("image/jpeg", 0.7));
+          order.push(n - 1);
+        }
+        loading.classList.add("hidden");
+        work.classList.remove("hidden");
+        renderGrid(); updateInfo();
+      } catch (e) {
+        console.error(e);
+        toast("Could not read PDF: " + e.message, "err");
+        loading.classList.add("hidden"); dz.classList.remove("hidden");
+      }
+    },
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    pdfBytes = null; pageCount = 0; thumbs = []; order = [];
+    work.classList.add("hidden"); resultArea.innerHTML = ""; dz.classList.remove("hidden");
+  });
+
+  saveBtn.addEventListener("click", async () => {
+    if (!order.length) return;
+    saveBtn.disabled = true; const orig = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<span class="spinner"></span> Saving…';
+    try {
+      const { PDFDocument } = window.PDFLib;
+      const src = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+      const out = await PDFDocument.create();
+      const pages = await out.copyPages(src, order);
+      pages.forEach((p) => out.addPage(p));
+      const result = await out.save();
+      resultArea.innerHTML =
+        '<div class="result-box"><h3>✓ Pages organized</h3>' +
+        '<p class="stat">New PDF has <b>' + order.length + '</b> pages in your chosen order.</p>' +
+        '<button class="btn coral" id="dl">Download organized.pdf</button></div>';
+      document.getElementById("dl").addEventListener("click", () => downloadBytes(result, "organized.pdf", "application/pdf"));
+      toast("Done!", "ok");
+    } catch (e) {
+      console.error(e);
+      toast("Could not save: " + e.message, "err");
+    } finally {
+      saveBtn.innerHTML = orig; saveBtn.disabled = order.length === 0;
+    }
+  });
+})();
+</script>
+</body>
+</html>

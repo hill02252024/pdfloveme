@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Annotate &amp; Markup PDF — PDFLoveMe</title>
+<meta name="description" content="Add text, highlights, shapes, images and black-out redaction boxes to a PDF. Annotation tool — runs entirely in your browser, files never leave your device.">
+<link rel="canonical" href="https://pdfloveme.com/pages/edit.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<!-- AdSense loader temporarily disabled (fake ad placeholder in use). Restore when approved:
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/index.html">PDF<span class="heart">♥</span>Me</a>
+    <nav class="nav">
+      <a href="/index.html#tools">Tools</a>
+      <a href="/index.html#how">How it works</a>
+      <a href="/index.html#faq">FAQ</a>
+      <a href="/blog/index.html">Blog</a>
+      <a href="/pages/about.html">About</a>
+      <a href="/pages/contact.html">Contact</a>
+      <a class="btn coral sm" href="/index.html#tools">Open a tool</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main class="tool-page">
+  <div class="wrap">
+    <div class="ad-slot ad-banner" style="margin:0 0 8px;">
+      <div>
+        <div class="ad-label">Advertisement</div>
+        <div class="ad-placeholder ad-ph-leaderboard">AD · 728×90</div>
+      </div>
+    </div>
+    <div class="crumb"><a href="../index.html">Home</a> / <a href="../index.html#tools">Tools</a> / Annotate PDF</div>
+    <div class="tool-hero">
+      <div class="ico">✏️</div>
+      <h1>Annotate &amp; Markup</h1>
+      <p>Add text, highlights, lines, images and black-out boxes on top of your PDF.</p>
+    </div>
+
+    <div class="panel" style="max-width:1000px;">
+      <div class="note-line">
+        This tool <b>adds</b> text, shapes and markup on top of the PDF. It can't rewrite the document's existing body text — PDFs aren't built for that. To change the original wording, edit the source file (e.g. Word) and export a fresh PDF.
+      </div>
+
+      <div class="dropzone" id="dz" tabindex="0" role="button" aria-label="Add a PDF file">
+        <div class="dz-ico">📄</div>
+        <h3>Drop a PDF here</h3>
+        <p>or <span class="browse">browse</span></p>
+      </div>
+      <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden>
+      <p class="hint">Files are processed locally and never uploaded.</p>
+
+      <div id="work" class="hidden">
+        <div class="toolbar">
+          <button class="btn ghost sm active" data-tool="select">Select</button>
+          <button class="btn ghost sm" data-tool="text">Text</button>
+          <button class="btn ghost sm" data-tool="hl">Highlight</button>
+          <button class="btn ghost sm" data-tool="box">Black-out</button>
+          <button class="btn ghost sm" data-tool="line">Line</button>
+          <button class="btn ghost sm" id="addImg">Image…</button>
+          <input type="file" id="imgInput" accept="image/png,image/jpeg,.png,.jpg,.jpeg" hidden>
+        </div>
+        <div class="toolbar">
+          <div class="field" style="flex-direction:row;align-items:center;gap:6px;"><label for="annText" style="margin:0;">Text</label><input type="text" id="annText" value="Note" style="min-width:140px;"></div>
+          <div class="field" style="flex-direction:row;align-items:center;gap:6px;"><label for="annColor" style="margin:0;">Colour</label><input type="color" id="annColor" value="#ff5d52" style="min-width:48px;height:38px;padding:3px;"></div>
+          <div class="field" style="flex-direction:row;align-items:center;gap:6px;"><label for="annSize" style="margin:0;">Text size</label><input type="number" id="annSize" value="16" min="8" max="72" style="min-width:80px;"></div>
+          <select id="pageSel"></select>
+        </div>
+        <p class="hint">Text: click to place · Highlight / Black-out / Line: drag on the page · Image: adds to the centre. Each item has a ✕ to delete and a corner to resize.</p>
+        <div class="stage-wrap"><div class="stage" id="stage"><canvas id="pv"></canvas></div></div>
+        <div class="actions">
+          <button class="btn coral" id="applyBtn">Apply &amp; download</button>
+          <button class="btn ghost" id="clearPage">Clear this page</button>
+          <button class="btn ghost" id="resetBtn">Use another file</button>
+        </div>
+      </div>
+
+      <div id="loading" class="hidden"><div class="loading-row"><span class="spinner dark"></span> Working…</div></div>
+      <div id="resultArea"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap"><div class="footer-bottom"><span>© 2026 PDFLoveMe</span><a href="../index.html">Back to home</a></div></div>
+</footer>
+
+<script src="../js/app.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+(function () {
+  const { setupDropzone, validateFile, toast, downloadBytes } = window.PDFLove;
+  const $=(id)=>document.getElementById(id);
+  let pdfBytes=null, pdfjsDoc=null, pageCount=0, cur=1, tool="select";
+  let anns=[];           // {id,page,type,x,y,w,h,x2,y2,text,color,size,bytes,kind,aspect}
+  let images={};         // id -> objectURL for preview
+  let nextId=1;
+  const stage=$("stage"), pv=$("pv");
+
+  function hexRgb(h){const m=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h);return m?{r:parseInt(m[1],16)/255,g:parseInt(m[2],16)/255,b:parseInt(m[3],16)/255}:{r:1,g:0,b:0};}
+
+  // ---- tool selection ----
+  document.querySelectorAll("[data-tool]").forEach(b=>b.addEventListener("click",()=>{
+    tool=b.dataset.tool;
+    document.querySelectorAll("[data-tool]").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+  }));
+
+  function rel(e){ const r=pv.getBoundingClientRect(); const cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left; const cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top; return {x:Math.max(0,Math.min(r.width,cx))/r.width, y:Math.max(0,Math.min(r.height,cy))/r.height}; }
+
+  // ---- create overlay element for an annotation ----
+  function makeEl(a){
+    const W=pv.clientWidth, H=pv.clientHeight;
+    const el=document.createElement("div"); el.className="ov "+a.type; el.dataset.id=a.id;
+    const del=document.createElement("button"); del.className="del"; del.textContent="✕";
+    del.addEventListener("click",(e)=>{ e.stopPropagation(); anns=anns.filter(x=>x.id!==a.id); rebuild(); });
+    if(a.type==="text"){
+      el.style.left=(a.x*W)+"px"; el.style.top=(a.y*H)+"px";
+      el.style.color=a.color; el.style.fontSize=(a.size*(W/curW))+"px"; el.textContent=a.text;
+      el.appendChild(del); enableDrag(el,a,false);
+    } else if(a.type==="hl"||a.type==="box"){
+      el.style.left=(a.x*W)+"px"; el.style.top=(a.y*H)+"px"; el.style.width=(a.w*W)+"px"; el.style.height=(a.h*H)+"px";
+      if(a.type==="hl") el.style.background="rgba("+Math.round(a.colorRGB.r*255)+","+Math.round(a.colorRGB.g*255)+","+Math.round(a.colorRGB.b*255)+",.4)";
+      const rs=document.createElement("div"); rs.className="rs"; el.appendChild(rs); el.appendChild(del);
+      enableDrag(el,a,true,rs);
+    } else if(a.type==="img"){
+      el.style.left=(a.x*W)+"px"; el.style.top=(a.y*H)+"px"; el.style.width=(a.w*W)+"px"; el.style.height=(a.w*W*a.aspect)+"px";
+      const im=document.createElement("img"); im.src=images[a.id]; el.appendChild(im);
+      const rs=document.createElement("div"); rs.className="rs"; el.appendChild(rs); el.appendChild(del);
+      enableDrag(el,a,true,rs,true);
+    } else if(a.type==="line"){
+      const x1=a.x*W,y1=a.y*H,x2=a.x2*W,y2=a.y2*H;
+      const len=Math.hypot(x2-x1,y2-y1), ang=Math.atan2(y2-y1,x2-x1)*180/Math.PI;
+      el.style.left=x1+"px"; el.style.top=y1+"px"; el.style.width=len+"px"; el.style.height="0px";
+      el.style.borderTop="3px solid "+a.color; el.style.transformOrigin="left center"; el.style.transform="rotate("+ang+"deg)";
+      del.style.transform="rotate("+(-ang)+"deg)"; el.appendChild(del);
+    }
+    stage.appendChild(el);
+  }
+  function enableDrag(el,a,resizable,rs,keepAspect){
+    let st=null;
+    const evXY=(e)=>({x:(e.touches?e.touches[0].clientX:e.clientX),y:(e.touches?e.touches[0].clientY:e.clientY)});
+    el.addEventListener("mousedown",down); el.addEventListener("touchstart",down,{passive:false});
+    if(rs){ rs.addEventListener("mousedown",downR); rs.addEventListener("touchstart",downR,{passive:false}); }
+    function down(e){ if(e.target.classList.contains("rs")||e.target.classList.contains("del"))return; e.preventDefault();e.stopPropagation(); const p=evXY(e); const r=el.getBoundingClientRect(); st={m:"move",dx:p.x-r.left,dy:p.y-r.top}; }
+    function downR(e){ e.preventDefault(); e.stopPropagation(); st={m:"resize"}; }
+    function move(e){ if(!st)return; e.preventDefault(); const sr=pv.getBoundingClientRect(); const p=evXY(e);
+      if(st.m==="move"){ let left=p.x-sr.left-st.dx, top=p.y-sr.top-st.dy;
+        left=Math.max(0,Math.min(sr.width-el.offsetWidth,left)); top=Math.max(0,Math.min(sr.height-el.offsetHeight,top));
+        a.x=left/sr.width; a.y=top/sr.height; el.style.left=left+"px"; el.style.top=top+"px";
+      } else { let w=p.x-sr.left-(a.x*sr.width); w=Math.max(20,w); a.w=w/sr.width; el.style.width=w+"px";
+        if(keepAspect) el.style.height=(w*a.aspect)+"px"; else if(a.type!=="text"){ let h=p.y-sr.top-(a.y*sr.height); h=Math.max(12,h); a.h=h/sr.height; el.style.height=h+"px"; } }
+    }
+    window.addEventListener("mousemove",move); window.addEventListener("touchmove",move,{passive:false});
+    window.addEventListener("mouseup",()=>st=null); window.addEventListener("touchend",()=>st=null);
+  }
+
+  function rebuild(){
+    [...stage.querySelectorAll(".ov")].forEach(e=>e.remove());
+    anns.filter(a=>a.page===cur).forEach(makeEl);
+  }
+
+  // ---- drawing new annotations ----
+  let draw=null, tempEl=null;
+  stage.addEventListener("mousedown",dstart); stage.addEventListener("touchstart",dstart,{passive:false});
+  function dstart(e){
+    if(e.target!==pv) return; // only when starting on the page canvas
+    const p=rel(e);
+    if(tool==="text"){
+      const a={id:nextId++,page:cur,type:"text",x:p.x,y:p.y,text:$("annText").value||"Text",color:$("annColor").value,size:+$("annSize").value};
+      anns.push(a); rebuild(); return;
+    }
+    if(tool==="hl"||tool==="box"||tool==="line"){ e.preventDefault(); draw={x0:p.x,y0:p.y}; }
+  }
+  function dmove(e){ if(!draw)return; e.preventDefault(); const p=rel(e); const W=pv.clientWidth,H=pv.clientHeight;
+    if(!tempEl){ tempEl=document.createElement("div"); tempEl.className="ov "+(tool==="line"?"line":(tool==="hl"?"hl":"box")); stage.appendChild(tempEl); }
+    if(tool==="line"){ const x1=draw.x0*W,y1=draw.y0*H,x2=p.x*W,y2=p.y*H; const len=Math.hypot(x2-x1,y2-y1),ang=Math.atan2(y2-y1,x2-x1)*180/Math.PI;
+      tempEl.style.left=x1+"px";tempEl.style.top=y1+"px";tempEl.style.width=len+"px";tempEl.style.height="0";tempEl.style.borderTop="3px solid "+$("annColor").value;tempEl.style.transformOrigin="left center";tempEl.style.transform="rotate("+ang+"deg)"; }
+    else { const l=Math.min(draw.x0,p.x)*W,t=Math.min(draw.y0,p.y)*H,w=Math.abs(p.x-draw.x0)*W,h=Math.abs(p.y-draw.y0)*H;
+      tempEl.style.left=l+"px";tempEl.style.top=t+"px";tempEl.style.width=w+"px";tempEl.style.height=h+"px";
+      if(tool==="hl"){const c=hexRgb($("annColor").value);tempEl.style.background="rgba("+Math.round(c.r*255)+","+Math.round(c.g*255)+","+Math.round(c.b*255)+",.4)";} else tempEl.style.background="#16161d"; }
+  }
+  function dend(e){ if(!draw)return; const p=rel(e);
+    if(tempEl){tempEl.remove();tempEl=null;}
+    if(tool==="line"){ if(Math.hypot(p.x-draw.x0,p.y-draw.y0)>0.01){ anns.push({id:nextId++,page:cur,type:"line",x:draw.x0,y:draw.y0,x2:p.x,y2:p.y,color:$("annColor").value}); } }
+    else { const w=Math.abs(p.x-draw.x0),h=Math.abs(p.y-draw.y0); if(w>0.01&&h>0.01){ const a={id:nextId++,page:cur,type:tool,x:Math.min(draw.x0,p.x),y:Math.min(draw.y0,p.y),w,h,color:$("annColor").value,colorRGB:hexRgb($("annColor").value)}; anns.push(a); } }
+    draw=null; rebuild();
+  }
+  window.addEventListener("mousemove",dmove); window.addEventListener("touchmove",dmove,{passive:false});
+  window.addEventListener("mouseup",dend); window.addEventListener("touchend",dend);
+
+  // ---- add image ----
+  $("addImg").addEventListener("click",()=>$("imgInput").click());
+  $("imgInput").addEventListener("change", async ()=>{
+    const f=$("imgInput").files[0]; if(!f) return;
+    const bytes=new Uint8Array(await f.arrayBuffer());
+    const kind=(f.type.includes("png")||f.name.toLowerCase().endsWith(".png"))?"png":"jpg";
+    const url=URL.createObjectURL(new Blob([bytes]));
+    const im=new Image(); await new Promise(r=>{im.onload=r;im.src=url;});
+    const id=nextId++; images[id]=url;
+    anns.push({id,page:cur,type:"img",x:0.35,y:0.4,w:0.3,bytes,kind,aspect:(im.height/im.width)||0.6});
+    rebuild();
+  });
+
+  // ---- page nav ----
+  let curW=612, curH=792;
+  async function renderPage(n){
+    cur=n;
+    const page=await pdfjsDoc.getPage(n);
+    const vp1=page.getViewport({scale:1}); curW=vp1.width; curH=vp1.height;
+    const viewport=page.getViewport({scale:1.3});
+    pv.width=viewport.width; pv.height=viewport.height;
+    await page.render({canvasContext:pv.getContext("2d"),viewport}).promise;
+    rebuild();
+  }
+  $("pageSel").addEventListener("change", ()=>renderPage(+$("pageSel").value));
+  $("clearPage").addEventListener("click", ()=>{ anns=anns.filter(a=>a.page!==cur); rebuild(); });
+
+  setupDropzone($("dz"), $("fileInput"), {
+    accept:["pdf"],
+    onFiles: async (incoming)=>{
+      const f=incoming[0]; const v=validateFile(f,["pdf"]);
+      if(!v.ok){toast(v.reason,"err");return;}
+      $("resultArea").innerHTML=""; $("dz").classList.add("hidden"); $("loading").classList.remove("hidden");
+      try{
+        pdfBytes=await f.arrayBuffer();
+        pdfjsDoc=await pdfjsLib.getDocument({data:pdfBytes.slice(0)}).promise;
+        pageCount=pdfjsDoc.numPages; anns=[];
+        $("pageSel").innerHTML=""; for(let n=1;n<=pageCount;n++){const o=document.createElement("option");o.value=n;o.textContent="Page "+n;$("pageSel").appendChild(o);}
+        await renderPage(1);
+        $("loading").classList.add("hidden"); $("work").classList.remove("hidden");
+      }catch(e){console.error(e);toast("Could not read PDF: "+e.message,"err");$("loading").classList.add("hidden");$("dz").classList.remove("hidden");}
+    }
+  });
+
+  $("resetBtn").addEventListener("click", ()=>{ pdfBytes=null; anns=[]; [...stage.querySelectorAll(".ov")].forEach(e=>e.remove()); $("work").classList.add("hidden"); $("resultArea").innerHTML=""; $("dz").classList.remove("hidden"); });
+
+  $("applyBtn").addEventListener("click", async ()=>{
+    if(!pdfBytes) return;
+    if(!anns.length){ toast("Add at least one annotation first.","err"); return; }
+    const btn=$("applyBtn"); btn.disabled=true; const o=btn.innerHTML; btn.innerHTML='<span class="spinner"></span> Applying…';
+    try{
+      const { PDFDocument, StandardFonts, rgb, degrees } = window.PDFLib;
+      const doc=await PDFDocument.load(pdfBytes,{ignoreEncryption:true});
+      const font=await doc.embedFont(StandardFonts.Helvetica);
+      const pages=doc.getPages();
+      // pre-embed images
+      const embedded={};
+      for(const a of anns){ if(a.type==="img"&&!(a.id in embedded)){ embedded[a.id]= a.kind==="png"? await doc.embedPng(a.bytes): await doc.embedJpg(a.bytes); } }
+      for(const a of anns){
+        const page=pages[a.page-1]; if(!page) continue;
+        const W=page.getWidth(), H=page.getHeight();
+        const c=a.colorRGB||hexRgb(a.color||"#ff5d52");
+        if(a.type==="text"){
+          page.drawText(a.text,{x:a.x*W,y:H-(a.y*H)-a.size,size:a.size,font,color:rgb(c.r,c.g,c.b)});
+        } else if(a.type==="hl"){
+          page.drawRectangle({x:a.x*W,y:H-(a.y*H)-(a.h*H),width:a.w*W,height:a.h*H,color:rgb(c.r,c.g,c.b),opacity:0.4});
+        } else if(a.type==="box"){
+          page.drawRectangle({x:a.x*W,y:H-(a.y*H)-(a.h*H),width:a.w*W,height:a.h*H,color:rgb(0.09,0.09,0.11)});
+        } else if(a.type==="line"){
+          const start={x:a.x*W,y:H-(a.y*H)}, end={x:a.x2*W,y:H-(a.y2*H)};
+          page.drawLine({start,end,thickness:2,color:rgb(c.r,c.g,c.b)});
+          // arrowhead
+          const ang=Math.atan2(end.y-start.y,end.x-start.x), ah=8;
+          page.drawLine({start:end,end:{x:end.x-ah*Math.cos(ang-0.4),y:end.y-ah*Math.sin(ang-0.4)},thickness:2,color:rgb(c.r,c.g,c.b)});
+          page.drawLine({start:end,end:{x:end.x-ah*Math.cos(ang+0.4),y:end.y-ah*Math.sin(ang+0.4)},thickness:2,color:rgb(c.r,c.g,c.b)});
+        } else if(a.type==="img"){
+          const img=embedded[a.id]; const w=a.w*W, h=w*a.aspect;
+          page.drawImage(img,{x:a.x*W,y:H-(a.y*H)-h,width:w,height:h});
+        }
+      }
+      const result=await doc.save();
+      $("resultArea").innerHTML='<div class="result-box"><h3>✓ Annotations applied</h3><p class="stat">Added <b>'+anns.length+'</b> item(s) across your pages.</p><button class="btn coral" id="dl">Download annotated.pdf</button></div>';
+      $("dl").addEventListener("click", ()=>downloadBytes(result,"annotated.pdf","application/pdf"));
+      toast("Done!","ok");
+    }catch(e){console.error(e);toast("Could not apply: "+e.message,"err");}
+    finally{btn.innerHTML=o;btn.disabled=false;}
+  });
+})();
+</script>
+</body>
+</html>
