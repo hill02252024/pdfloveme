@@ -374,3 +374,9 @@ section { padding: 64px 0; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; margin: 14px 0; }
 .toolbar .btn.active { background: var(--coral); border-color: var(--coral); color: #fff; }
 .note-line { font-size: 13px; color: #6b3a36; background: #fff7f6; border: 1px solid var(--line); border-left: 3px solid var(--coral); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 16px auto; max-width: 760px; }
+
+/* ============================================================
+   AdSense not yet approved — hide the fake ad placeholders entirely.
+   Restore real ads later by deleting just this one rule.
+   ============================================================ */
+.ad-slot, .ad-inline { display: none !important; }
