@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JPG to PDF — PDFLoveMe</title>
-<meta name="description" content="Convert JPG and PNG images into a single PDF. Choose page size and margins. Runs entirely in your browser — files never leave your device.">
+<meta name="description" content="Turn photos and screenshots into one tidy PDF. Drag them to reorder, pick a page size and a margin, and get a single document instead of loose images.">
 <link rel="canonical" href="https://pdfloveme.com/pages/jpg-to-pdf.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pdfloveme.com/pages/jpg-to-pdf.html">
 <meta property="og:title" content="JPG to PDF — PDFLoveMe">
-<meta property="og:description" content="Convert JPG and PNG images into a single PDF. Choose page size and margins. Runs entirely in your browser — files never leave your device.">
+<meta property="og:description" content="Turn photos and screenshots into one tidy PDF. Drag them to reorder, pick a page size and a margin, and get a single document instead of loose images.">
 <meta property="og:image" content="https://pdfloveme.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,103 @@
 <!-- AdSense loader temporarily disabled (fake ad placeholder in use). Restore when approved:
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="../vendor/pdf-lib/pdf-lib-1.17.1.min.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "JPG to PDF",
+  "url": "https://pdfloveme.com/pages/jpg-to-pdf.html",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Any modern browser",
+  "browserRequirements": "Requires JavaScript. No installation, no account.",
+  "description": "Converts JPG and PNG images into a single PDF document with configurable page size, margins and image order, entirely inside the browser.",
+  "featureList": "JPG and PNG input, multiple images into one PDF, drag to reorder, page size selection, margin control, browser-only processing, direct download",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "isAccessibleForFree": true,
+  "publisher": {
+    "@type": "Organization",
+    "name": "PDFLoveMe",
+    "url": "https://pdfloveme.com/"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://pdfloveme.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Tools",
+      "item": "https://pdfloveme.com/index.html#tools"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "JPG to PDF",
+      "item": "https://pdfloveme.com/pages/jpg-to-pdf.html"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Which image formats can I use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "JPG and PNG. Mixed batches are fine — put them in whatever order you need. Order them before you convert; the PDF follows the list rather than the filenames."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I control the order of the images?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Drag them into position before converting; the PDF follows that order. This is worth getting right for anything multi-page, since a reshot page tends to land at the end of a gallery rather than back in sequence."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why should I set a page size instead of keeping the photo size?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Uniform pages print and display predictably. Native image dimensions produce a document with a different page shape on every page. Uniform pages also make the document far easier to print double-sided or bind without one sheet sticking out."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are my photos uploaded?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. They are read and assembled in your browser and the PDF is generated locally. That matters here more than for most tools, because photographed paperwork is usually identity documents and statements."
+      }
+    }
+  ]
+}
+</script>
+<style>
+  .tool-copy{max-width:820px;margin:34px auto 0}
+  .tool-copy h2{margin-top:30px;font-size:21px}
+  .tool-copy p,.tool-copy li{font-size:16px;line-height:1.75}
+  .tool-copy .rel{margin-top:22px;font-size:15px}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -95,6 +191,33 @@
 
       <div id="resultArea"></div>
     </div>
+    <article class="tool-copy">
+      <h2>Photos of documents are still documents</h2>
+      <p>Most paperwork now starts as a phone photo. That is fine until you have to send it: eight images, in whatever order the gallery decided, to someone who wanted one file.</p>
+      <p>This turns them into a proper PDF — one document, correct order, consistent page size. The recipient opens one thing, and it prints predictably instead of stretching one photo across a page and squeezing the next.</p>
+      <h2>Page size and margins matter more than you would think</h2>
+      <p>An image dropped into a PDF at its own dimensions produces pages of wildly different shapes. Choosing A4 or Letter makes every page the same, which is what printers, portals and staplers all expect.</p>
+      <p>A margin is not decoration either. Anything close to the page edge risks being clipped when printed, and photographed documents are usually shot right up to the paper edge. A small margin buys back that safety.</p>
+      <h2>The usual reasons</h2>
+      <p>Receipts for an expense claim. Photographed ID for a verification form. A handwritten note or a whiteboard that needs to go into a file. Insurance evidence — damage photos submitted as one document rather than fifteen attachments.</p>
+      <p>It also makes photos far easier to archive. A single dated PDF in a folder beats a scatter of IMG_4471 files nobody will ever identify again.</p>
+      <h2>File size, and why eight photos become a big PDF</h2>
+      <p>A modern phone photo is several megabytes, and putting eight of them in a PDF gives you a document of roughly eight photos' worth. Nothing here re-compresses them, because silently degrading someone's evidence photos would be the wrong default.</p>
+      <p>If the result is too large to email, run it through <a href="/pages/compress.html">Compress PDF</a> afterwards. Doing it in that order — assemble at full quality, then compress once with a level you have chosen and checked — gives a much better result than shrinking each photo beforehand and hoping.</p>
+      <h2>Photograph the document properly and everything else is easier</h2>
+      <p>The conversion can only work with what it is given. Flat lighting with no shadow across the page, the camera parallel to the paper rather than at an angle, and the whole sheet in frame will do more for the result than any setting here.</p>
+      <p>Angle is the big one. A photo taken from above and to one side produces a trapezoid, and a trapezoid dropped into a rectangular page looks like exactly what it is. Standing square over the document takes two seconds and removes the problem.</p>
+      <p>Check the order before converting, especially for a multi-page contract shot in one session. Phone galleries sort by capture time, which is usually right, but a page reshot because the first attempt was blurry lands at the end of the sequence rather than back in its place.</p>
+      <h2>What happens to your files</h2>
+      <p>Every one of these runs in your browser. The file is read from your disk, processed in memory and handed back as a download — there is no upload, no server copy and no account.</p>
+      <p>Photos of documents are among the most sensitive things people convert — ID cards, statements, medical letters. None of them leave the device here.</p>
+      <h2>Frequently asked questions</h2>
+      <p><b>Which image formats can I use?</b> JPG and PNG. Mixed batches are fine — put them in whatever order you need. Order them before you convert; the PDF follows the list rather than the filenames.</p>
+      <p><b>Can I control the order of the images?</b> Yes. Drag them into position before converting; the PDF follows that order. This is worth getting right for anything multi-page, since a reshot page tends to land at the end of a gallery rather than back in sequence.</p>
+      <p><b>Why should I set a page size instead of keeping the photo size?</b> Uniform pages print and display predictably. Native image dimensions produce a document with a different page shape on every page. Uniform pages also make the document far easier to print double-sided or bind without one sheet sticking out.</p>
+      <p><b>Are my photos uploaded?</b> No. They are read and assembled in your browser and the PDF is generated locally. That matters here more than for most tools, because photographed paperwork is usually identity documents and statements.</p>
+      <p class="rel">Related: <a href="/pages/pdf-to-jpg.html">PDF to JPG</a> · <a href="/pages/merge.html">Merge PDF</a> · <a href="/pages/compress.html">Compress PDF</a> · <a href="/index.html#tools">All tools</a></p>
+    </article>
   </div>
 </main>
 

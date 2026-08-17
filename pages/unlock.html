@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unlock PDF (Remove Password) — PDFLoveMe</title>
-<meta name="description" content="Remove the password from a PDF you can already open. You must know the current password — this is not a cracking tool. Runs entirely in your browser.">
+<meta name="description" content="Remove a password from a PDF you can already open, so it stops asking every time. You must know the current password — this is not a cracking tool at all.">
 <link rel="canonical" href="https://pdfloveme.com/pages/unlock.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pdfloveme.com/pages/unlock.html">
 <meta property="og:title" content="Unlock PDF (Remove Password) — PDFLoveMe">
-<meta property="og:description" content="Remove the password from a PDF you can already open. You must know the current password — this is not a cracking tool. Runs entirely in your browser.">
+<meta property="og:description" content="Remove a password from a PDF you can already open, so it stops asking every time. You must know the current password — this is not a cracking tool at all.">
 <meta property="og:image" content="https://pdfloveme.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,7 +23,103 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 -->
 <!-- @cantoo/pdf-lib supports decryption with a known password; UMD build exposes window.PDFLib -->
-<script src="https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@2.3.2/dist/pdf-lib.min.js"></script>
+<script src="../vendor/pdf-lib/cantoo-pdf-lib-2.3.2.min.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Unlock PDF",
+  "url": "https://pdfloveme.com/pages/unlock.html",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Any modern browser",
+  "browserRequirements": "Requires JavaScript. No installation, no account.",
+  "description": "Removes the open password from a PDF when the current password is supplied, producing an unprotected copy entirely inside the browser.",
+  "featureList": "Removes a known open password, requires the current password, original document content preserved, browser-only processing, direct download, not a password-cracking tool",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "isAccessibleForFree": true,
+  "publisher": {
+    "@type": "Organization",
+    "name": "PDFLoveMe",
+    "url": "https://pdfloveme.com/"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://pdfloveme.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Tools",
+      "item": "https://pdfloveme.com/index.html#tools"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Unlock PDF",
+      "item": "https://pdfloveme.com/pages/unlock.html"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can this open a PDF whose password I don't know?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. It is not a cracking tool. You must supply the current password; without it nothing can be done. Senders often use a predictable format — a date of birth, the last digits of an account — and their help pages usually document it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my password sent anywhere?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. It is used locally in your browser to decrypt the file and is never transmitted or kept. It exists only in your browser's memory for the moment it takes to decrypt the file, and is discarded when the tab closes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the original file change?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. An unprotected copy is generated for download and the original stays as it is. That makes the operation safe to retry: you can always go back to the protected original if something looks wrong."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I remove the password before storing a sensitive file?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Usually not. If the document is sensitive, keeping it encrypted is the safer default — unlock only for files you are about to work with locally. A sensible rule is to unlock the copy you are about to work with, and leave anything going into long-term storage encrypted."
+      }
+    }
+  ]
+}
+</script>
+<style>
+  .tool-copy{max-width:820px;margin:34px auto 0}
+  .tool-copy h2{margin-top:30px;font-size:21px}
+  .tool-copy p,.tool-copy li{font-size:16px;line-height:1.75}
+  .tool-copy .rel{margin-top:22px;font-size:15px}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -87,6 +183,30 @@
 
       <div id="resultArea"></div>
     </div>
+    <article class="tool-copy">
+      <h2>For the file you can open but keep having to unlock</h2>
+      <p>The usual situation is not a mystery document. It is your own bank statement, your own payslip, your own insurance policy — sent encrypted, with a password you know, and now needed in a folder where typing it every single time is a nuisance.</p>
+      <p>Give the tool the password you already have and it saves a copy without it. The original stays where it is, untouched.</p>
+      <h2>What it will not do</h2>
+      <p>It cannot open a file whose password you do not know. There is no guessing, no brute force and no bypass. If you cannot open the document in a normal PDF reader, this tool cannot either.</p>
+      <p>That limitation is deliberate. Removing protection from a document you were never given access to is not a feature worth building, and any tool claiming otherwise should be treated with suspicion.</p>
+      <h2>Before you strip the password</h2>
+      <p>Think about where the unprotected copy is going to live. A payslip with no password sitting in a synced cloud folder is less protected than the encrypted one you started with. Unlocking makes sense for a file you are about to work with locally, or one going into storage that is already access-controlled.</p>
+      <p>If you need to pass it on to someone else, consider re-encrypting with a password you choose rather than sending it open.</p>
+      <h2>Why a file is encrypted in the first place</h2>
+      <p>Banks, insurers and payroll systems routinely send documents encrypted with something predictable — a date of birth, the last digits of an account number, a national ID. That is not strong protection, but it does stop a statement being read by whoever happens to be looking over your shoulder in a shared mailbox.</p>
+      <p>Knowing the pattern is often how people get in. If a regular monthly document suddenly will not open, the sender's own help page usually documents the format they use, and it is more reliable than guessing.</p>
+      <p>Once it opens, think about the copy you are about to create. Removing the password from a payslip so you can attach it to an application is reasonable; removing it from a run of statements that will then sit unprotected in cloud storage is a downgrade you probably did not intend. Unlock the one you need, when you need it.</p>
+      <h2>What happens to your files</h2>
+      <p>Every one of these runs in your browser. The file is read from your disk, processed in memory and handed back as a download — there is no upload, no server copy and no account.</p>
+      <p>The password you type is used in your browser to decrypt the document and is never transmitted or stored.</p>
+      <h2>Frequently asked questions</h2>
+      <p><b>Can this open a PDF whose password I don't know?</b> No. It is not a cracking tool. You must supply the current password; without it nothing can be done. Senders often use a predictable format — a date of birth, the last digits of an account — and their help pages usually document it.</p>
+      <p><b>Is my password sent anywhere?</b> No. It is used locally in your browser to decrypt the file and is never transmitted or kept. It exists only in your browser's memory for the moment it takes to decrypt the file, and is discarded when the tab closes.</p>
+      <p><b>Does the original file change?</b> No. An unprotected copy is generated for download and the original stays as it is. That makes the operation safe to retry: you can always go back to the protected original if something looks wrong.</p>
+      <p><b>Should I remove the password before storing a sensitive file?</b> Usually not. If the document is sensitive, keeping it encrypted is the safer default — unlock only for files you are about to work with locally. A sensible rule is to unlock the copy you are about to work with, and leave anything going into long-term storage encrypted.</p>
+      <p class="rel">Related: <a href="/pages/encrypt.html">Encrypt PDF</a> · <a href="/pages/merge.html">Merge PDF</a> · <a href="/pages/fill-form.html">Fill a PDF Form</a> · <a href="/index.html#tools">All tools</a></p>
+    </article>
   </div>
 </main>
 

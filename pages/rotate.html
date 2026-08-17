@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rotate PDF — PDFLoveMe</title>
-<meta name="description" content="Rotate PDF pages 90°, 180° or -90°, per page or all at once. Runs entirely in your browser — files never leave your device.">
+<meta name="description" content="Fix pages that came out sideways or upside down. Turn a single page or the whole document 90, 180 or minus 90 degrees, with a live preview as you work.">
 <link rel="canonical" href="https://pdfloveme.com/pages/rotate.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pdfloveme.com/pages/rotate.html">
 <meta property="og:title" content="Rotate PDF — PDFLoveMe">
-<meta property="og:description" content="Rotate PDF pages 90°, 180° or -90°, per page or all at once. Runs entirely in your browser — files never leave your device.">
+<meta property="og:description" content="Fix pages that came out sideways or upside down. Turn a single page or the whole document 90, 180 or minus 90 degrees, with a live preview as you work.">
 <meta property="og:image" content="https://pdfloveme.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,8 +22,104 @@
 <!-- AdSense loader temporarily disabled (fake ad placeholder in use). Restore when approved:
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../vendor/pdf-lib/pdf-lib-1.17.1.min.js"></script>
+<script src="../vendor/pdfjs/pdf-3.11.174.min.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Rotate PDF",
+  "url": "https://pdfloveme.com/pages/rotate.html",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Any modern browser",
+  "browserRequirements": "Requires JavaScript. No installation, no account.",
+  "description": "Rotates PDF pages by 90, 180 or -90 degrees individually or across the whole document, with live preview, entirely inside the browser.",
+  "featureList": "Rotate 90 180 or -90 degrees, per-page or whole-document rotation, live preview, page thumbnails, browser-only processing, direct download",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "isAccessibleForFree": true,
+  "publisher": {
+    "@type": "Organization",
+    "name": "PDFLoveMe",
+    "url": "https://pdfloveme.com/"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://pdfloveme.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Tools",
+      "item": "https://pdfloveme.com/index.html#tools"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Rotate PDF",
+      "item": "https://pdfloveme.com/pages/rotate.html"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I rotate just one page?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Rotate individual pages, or apply one rotation to the whole document if everything came out the same way. Applying one rotation to the whole document is the right move when a scanner flipped everything the same way, which is common."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does rotating reduce quality?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Only the page orientation changes; the content is not re-rendered or re-compressed. This is different from compressing or converting, both of which do resample the page and cost you detail."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Will the rotation stick when someone else opens it?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. It is written into the file, not just applied to your view. That is the difference between rotating the file and rotating your view in a reader, which only affects your own screen."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I rotate before running OCR?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Text recognition is considerably more accurate on an upright page. Recognition engines assume horizontal text lines, so a page lying on its side produces markedly worse results."
+      }
+    }
+  ]
+}
+</script>
+<style>
+  .tool-copy{max-width:820px;margin:34px auto 0}
+  .tool-copy h2{margin-top:30px;font-size:21px}
+  .tool-copy p,.tool-copy li{font-size:16px;line-height:1.75}
+  .tool-copy .rel{margin-top:22px;font-size:15px}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -85,6 +181,30 @@
       <div id="loading" class="hidden"><div class="loading-row"><span class="spinner dark"></span> Rendering preview…</div></div>
       <div id="resultArea"></div>
     </div>
+    <article class="tool-copy">
+      <h2>The scanner problem</h2>
+      <p>Feed a stack of paper through a scanner and some of it comes out sideways. Photograph a document with a phone and the orientation depends on how you were holding it. The content is fine; it is just lying down.</p>
+      <p>Rotating fixes it properly, at the document level. That is different from turning your head, and different from rotating the view in a reader — the rotation is written into the file, so it looks right for whoever opens it next.</p>
+      <h2>Per page or all at once</h2>
+      <p>If every page came out the same wrong way, rotate the whole document in one action. If the scanner only flipped a few — which is the more common and more annoying case — rotate those individually.</p>
+      <p>The preview updates as you go, so you are not guessing. Ninety degrees turns clockwise, minus ninety turns the other way, and one hundred and eighty is for the pages that came in upside down.</p>
+      <h2>Why it matters beyond looking tidy</h2>
+      <p>A sideways page is a real problem when the document is going somewhere automated. Printers will honour the rotation and waste paper on it. Some portals reject documents whose page orientation is inconsistent. Anyone reading on a phone has to rotate their whole screen for one page.</p>
+      <p>It also matters before OCR: text recognition on a sideways page is markedly worse than on an upright one, so rotating first improves anything you do afterwards.</p>
+      <h2>Rotation, orientation and the thing that confuses everyone</h2>
+      <p>There are two different notions of 'sideways' in a PDF and they are easy to mix up. A page can be <i>landscape</i> — genuinely wider than it is tall, which is correct for a spreadsheet or a plan — or it can be a portrait page whose content was scanned at ninety degrees. The first needs no fixing; the second does.</p>
+      <p>Look at the text, not the page shape. If the words run up the side of a page that is taller than it is wide, that is a scan to rotate. If the words run normally across a page that is wider than it is tall, leave it alone; rotating will make it worse.</p>
+      <p>Also worth knowing: some readers remember a rotation you applied in their own viewer without writing it to the file. The document looks fine to you and sideways to everyone else. Rotating here writes the change into the file itself, which is why it survives being emailed.</p>
+      <h2>What happens to your files</h2>
+      <p>Every one of these runs in your browser. The file is read from your disk, processed in memory and handed back as a download — there is no upload, no server copy and no account.</p>
+      <p>Rotation changes only the page's orientation flag and geometry. The content itself is not re-rendered, so nothing loses quality.</p>
+      <h2>Frequently asked questions</h2>
+      <p><b>Can I rotate just one page?</b> Yes. Rotate individual pages, or apply one rotation to the whole document if everything came out the same way. Applying one rotation to the whole document is the right move when a scanner flipped everything the same way, which is common.</p>
+      <p><b>Does rotating reduce quality?</b> No. Only the page orientation changes; the content is not re-rendered or re-compressed. This is different from compressing or converting, both of which do resample the page and cost you detail.</p>
+      <p><b>Will the rotation stick when someone else opens it?</b> Yes. It is written into the file, not just applied to your view. That is the difference between rotating the file and rotating your view in a reader, which only affects your own screen.</p>
+      <p><b>Should I rotate before running OCR?</b> Yes. Text recognition is considerably more accurate on an upright page. Recognition engines assume horizontal text lines, so a page lying on its side produces markedly worse results.</p>
+      <p class="rel">Related: <a href="/pages/organize.html">Organize Pages</a> · <a href="/pages/crop.html">Crop PDF</a> · <a href="/pages/pdf-to-jpg.html">PDF to JPG</a> · <a href="/index.html#tools">All tools</a></p>
+    </article>
   </div>
 </main>
 
@@ -94,7 +214,7 @@
 
 <script src="../js/app.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.min.js";
 (function () {
   const { setupDropzone, validateFile, toast, downloadBytes } = window.PDFLove;
   let pdfBytes = null, pageCount = 0;

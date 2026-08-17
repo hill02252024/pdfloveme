@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PDF to JPG — PDFLoveMe</title>
-<meta name="description" content="Convert every page of a PDF to a JPG image. Download single pages or all as a ZIP. Runs entirely in your browser — files never leave your device.">
+<meta name="description" content="Render every page of a PDF as a JPG image. Save a single page or download the lot as a ZIP, with a quality slider balancing sharpness against file size.">
 <link rel="canonical" href="https://pdfloveme.com/pages/pdf-to-jpg.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pdfloveme.com/pages/pdf-to-jpg.html">
 <meta property="og:title" content="PDF to JPG — PDFLoveMe">
-<meta property="og:description" content="Convert every page of a PDF to a JPG image. Download single pages or all as a ZIP. Runs entirely in your browser — files never leave your device.">
+<meta property="og:description" content="Render every page of a PDF as a JPG image. Save a single page or download the lot as a ZIP, with a quality slider balancing sharpness against file size.">
 <meta property="og:image" content="https://pdfloveme.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,8 +22,104 @@
 <!-- AdSense loader temporarily disabled (fake ad placeholder in use). Restore when approved:
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../vendor/pdfjs/pdf-3.11.174.min.js"></script>
+<script src="../vendor/jszip-3.10.1.min.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "PDF to JPG",
+  "url": "https://pdfloveme.com/pages/pdf-to-jpg.html",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Any modern browser",
+  "browserRequirements": "Requires JavaScript. No installation, no account.",
+  "description": "Renders each page of a PDF to a JPG image at a chosen quality, downloadable individually or as a ZIP archive, entirely inside the browser.",
+  "featureList": "Every page rendered to JPG, adjustable JPG quality, save a single page or all pages as a ZIP, page previews, browser-only processing, direct download",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "isAccessibleForFree": true,
+  "publisher": {
+    "@type": "Organization",
+    "name": "PDFLoveMe",
+    "url": "https://pdfloveme.com/"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://pdfloveme.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Tools",
+      "item": "https://pdfloveme.com/index.html#tools"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "PDF to JPG",
+      "item": "https://pdfloveme.com/pages/pdf-to-jpg.html"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I download all the pages at once?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Export the whole document as a ZIP rather than clicking each page individually. For anything longer than a handful of pages the ZIP is the only sane route."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What quality should I choose?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "High for anything with small text or fine detail; lower is fine for previews and chat images. Look at the smallest text on the busiest page before deciding — that is what degrades first."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the JPG keep the text selectable?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No — a JPG is a picture. That is sometimes the point, since it also drops metadata and hidden layers. Converting back to PDF afterwards gives you a picture of a document, not the document, and only OCR can recover the text."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my PDF uploaded to convert it?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Every page is rendered in your browser and the images are generated locally. Rendering a long document is limited by your CPU, so give a hundred-page file a moment before assuming it has stalled."
+      }
+    }
+  ]
+}
+</script>
+<style>
+  .tool-copy{max-width:820px;margin:34px auto 0}
+  .tool-copy h2{margin-top:30px;font-size:21px}
+  .tool-copy p,.tool-copy li{font-size:16px;line-height:1.75}
+  .tool-copy .rel{margin-top:22px;font-size:15px}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -87,6 +183,33 @@
       <div id="loading" class="hidden"><div class="loading-row"><span class="spinner dark"></span> Rendering pages…</div></div>
       <div id="resultArea"></div>
     </div>
+    <article class="tool-copy">
+      <h2>When a picture of the page is what you actually need</h2>
+      <p>PDF is the wrong format surprisingly often. Slide software wants an image. A CMS wants an image. Instant messaging apps preview an image and hide a PDF behind an attachment icon. Someone on an old phone cannot open a PDF at all but can certainly see a photo.</p>
+      <p>Rendering each page to JPG solves all of those. Each page becomes a picture that anything can display.</p>
+      <h2>Quality and size</h2>
+      <p>The quality slider is a direct trade between sharpness and file size. High quality suits anything with small text or fine lines — a plan, a table, a contract someone has to read. Lower quality is fine for a preview thumbnail or a page going into a chat.</p>
+      <p>If you are exporting a long document, take the ZIP. Saving forty pages one click at a time is how people give up halfway.</p>
+      <h2>Where it gets used</h2>
+      <p>Pulling a chart out of a report to drop into a deck. Posting one page of a notice to a group chat. Attaching a page as evidence in a form that only accepts images. Making thumbnails of a catalogue for a website.</p>
+      <p>It is also a blunt but effective flattening step: an image of a page carries no selectable text, no metadata and no hidden layers — sometimes precisely what you want before sharing.</p>
+      <h2>One page or all of them</h2>
+      <p>Exporting a single page is the common case: someone needs the chart on page seven, not the report. Click that page and save it, and nothing else is written to your disk.</p>
+      <p>Exporting everything is for the times you are moving a whole document into something that only speaks images — a slide deck, a listing, an archive of scanned records. The ZIP keeps the page order in the filenames, which matters as soon as there are more than about ten of them and you need to reassemble the sequence later.</p>
+      <h2>Resolution, and why the page looks soft</h2>
+      <p>A JPG is a fixed grid of pixels; a PDF page is not. When a page is rendered to an image it is sampled at some resolution, and everything below that scale is gone. Small text is the first casualty, which is why a page that was crisp in a reader can look soft as an image.</p>
+      <p>That is worth planning around. If the image is going on a slide or into a chat, softness is invisible and nobody cares. If someone has to read a table of figures from it, or you intend to print it, keep the quality high and check the smallest text before sending.</p>
+      <p>It is also why converting to JPG and back to PDF is a lossy round trip. The result is a picture of a document rather than the document, and it can never be converted back into selectable text without running OCR over it.</p>
+      <h2>What happens to your files</h2>
+      <p>Every one of these runs in your browser. The file is read from your disk, processed in memory and handed back as a download — there is no upload, no server copy and no account.</p>
+      <p>Rendering happens on your own machine, which is why a hundred-page document is limited by your CPU rather than by an upload queue.</p>
+      <h2>Frequently asked questions</h2>
+      <p><b>Can I download all the pages at once?</b> Yes. Export the whole document as a ZIP rather than clicking each page individually. For anything longer than a handful of pages the ZIP is the only sane route.</p>
+      <p><b>What quality should I choose?</b> High for anything with small text or fine detail; lower is fine for previews and chat images. Look at the smallest text on the busiest page before deciding — that is what degrades first.</p>
+      <p><b>Does the JPG keep the text selectable?</b> No — a JPG is a picture. That is sometimes the point, since it also drops metadata and hidden layers. Converting back to PDF afterwards gives you a picture of a document, not the document, and only OCR can recover the text.</p>
+      <p><b>Is my PDF uploaded to convert it?</b> No. Every page is rendered in your browser and the images are generated locally. Rendering a long document is limited by your CPU, so give a hundred-page file a moment before assuming it has stalled.</p>
+      <p class="rel">Related: <a href="/pages/jpg-to-pdf.html">JPG to PDF</a> · <a href="/pages/compress.html">Compress PDF</a> · <a href="/pages/split.html">Split PDF</a> · <a href="/index.html#tools">All tools</a></p>
+    </article>
   </div>
 </main>
 
@@ -96,7 +219,7 @@
 
 <script src="../js/app.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.min.js";
 (function () {
   const { setupDropzone, validateFile, toast, downloadBlob } = window.PDFLove;
   let pageCanvases = []; // full-res canvases per page

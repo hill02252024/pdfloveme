@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sign PDF — PDFLoveMe</title>
-<meta name="description" content="Add a handwritten or uploaded signature image to a PDF, position it on any page, and download. Runs entirely in your browser — files never leave your device.">
+<meta name="description" content="Draw a signature or upload an image of one, drag it onto the right spot and download the signed PDF. No printing, no scanning and nothing is uploaded.">
 <link rel="canonical" href="https://pdfloveme.com/pages/sign.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pdfloveme.com/pages/sign.html">
 <meta property="og:title" content="Sign PDF — PDFLoveMe">
-<meta property="og:description" content="Add a handwritten or uploaded signature image to a PDF, position it on any page, and download. Runs entirely in your browser — files never leave your device.">
+<meta property="og:description" content="Draw a signature or upload an image of one, drag it onto the right spot and download the signed PDF. No printing, no scanning and nothing is uploaded.">
 <meta property="og:image" content="https://pdfloveme.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,8 +22,104 @@
 <!-- AdSense loader temporarily disabled (fake ad placeholder in use). Restore when approved:
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../vendor/pdf-lib/pdf-lib-1.17.1.min.js"></script>
+<script src="../vendor/pdfjs/pdf-3.11.174.min.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Sign PDF",
+  "url": "https://pdfloveme.com/pages/sign.html",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Any modern browser",
+  "browserRequirements": "Requires JavaScript. No installation, no account.",
+  "description": "Places a drawn or uploaded signature image onto any page of a PDF, with drag positioning and resizing, entirely inside the browser.",
+  "featureList": "Draw a signature with mouse or finger, or upload a signature image, choose the page, drag to position, drag to resize, applied on top of existing content, browser-only processing, direct download",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "isAccessibleForFree": true,
+  "publisher": {
+    "@type": "Organization",
+    "name": "PDFLoveMe",
+    "url": "https://pdfloveme.com/"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://pdfloveme.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Tools",
+      "item": "https://pdfloveme.com/index.html#tools"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Sign PDF",
+      "item": "https://pdfloveme.com/pages/sign.html"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is this a legally binding signature?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It is a visual signature — the same standing as signing a printout. Documents that require a certified or qualified e-signature need a dedicated e-sign provider. For anything routine — approvals, delivery notes, tenancy paperwork, school forms — a visual signature is what people actually use and accept."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I draw or upload my signature?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Upload for consistency: sign paper once, photograph it, and keep a transparent PNG. Draw if you are on a touchscreen with a stylus. A photographed signature on a transparent background also looks the same on every document, which is what a signature is supposed to do."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I put the signature on any page?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Choose the page, then drag to position and resize it. Match its height roughly to the printed name beneath it and sit it on the line rather than floating above it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my signed document uploaded?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Both the signature and the document stay in your browser, which matters because a signature image is reusable by anyone who obtains it. That is worth taking seriously: a signature image can be reused by anyone who obtains it, on any document."
+      }
+    }
+  ]
+}
+</script>
+<style>
+  .tool-copy{max-width:820px;margin:34px auto 0}
+  .tool-copy h2{margin-top:30px;font-size:21px}
+  .tool-copy p,.tool-copy li{font-size:16px;line-height:1.75}
+  .tool-copy .rel{margin-top:22px;font-size:15px}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -107,6 +203,30 @@
       <div id="loading" class="hidden"><div class="loading-row"><span class="spinner dark"></span> Working…</div></div>
       <div id="resultArea"></div>
     </div>
+    <article class="tool-copy">
+      <h2>Print, sign, scan, send — the loop worth breaking</h2>
+      <p>The traditional way to sign a PDF involves a printer, a pen, a scanner and a working knowledge of whichever multifunction device is nearest. It produces a grey, slightly skewed image of a document that was already perfect, and it takes ten minutes you did not have.</p>
+      <p>Placing a signature directly onto the page skips all of it. The result is sharper than a scan, because the document underneath was never printed.</p>
+      <h2>Drawing versus uploading</h2>
+      <p>Drawing with a trackpad produces something that looks like it was drawn with a trackpad. On a phone or tablet, a finger or stylus gives a far more natural line, and it is worth switching device for anything that matters.</p>
+      <p>The alternative is to sign a blank sheet once, photograph it, remove the background, and keep a transparent PNG. Uploading that gives a consistent signature every time — the same one on every document, which is what a signature is supposed to be. A transparent background matters: a white rectangle around your name sitting on top of a form line looks exactly like what it is.</p>
+      <h2>What this is and is not</h2>
+      <p>This is a <b>visual</b> signature: an image of your signature placed on the page. It is the digital equivalent of signing a printout, and it is accepted for the overwhelming majority of everyday documents — internal approvals, delivery notes, tenancy paperwork, quotations, school forms.</p>
+      <p>It is not a certificate-based digital signature, which cryptographically binds an identity to the document and can prove the file has not changed since. Anything that explicitly demands a qualified or certified e-signature needs a dedicated e-sign service.</p>
+      <h2>Making a signature that looks like a signature</h2>
+      <p>A signature drawn with a mouse looks drawn with a mouse, and on a document that matters that is worth avoiding. The reliable method is to sign a blank white sheet with a decent pen, photograph it square-on in good light, and crop tightly to the strokes.</p>
+      <p>Then remove the background so it becomes a transparent PNG. Without that step you are placing a white rectangle on the page, which covers the form line your signature is meant to sit on and announces itself immediately. Any basic image editor will do it, and it is a one-off job.</p>
+      <p>Size and position matter more than people expect. A signature scaled far larger than the line it sits on looks wrong even when nobody can articulate why. Match it roughly to the height of the printed name beneath it, and place it sitting on the line rather than floating above it.</p>
+      <h2>What happens to your files</h2>
+      <p>Every one of these runs in your browser. The file is read from your disk, processed in memory and handed back as a download — there is no upload, no server copy and no account.</p>
+      <p>This one matters more than most. A signature image is reusable by anyone who has it, so a contract carrying your signature is not a document to hand to an unknown server. Here it never leaves the browser.</p>
+      <h2>Frequently asked questions</h2>
+      <p><b>Is this a legally binding signature?</b> It is a visual signature — the same standing as signing a printout. Documents that require a certified or qualified e-signature need a dedicated e-sign provider. For anything routine — approvals, delivery notes, tenancy paperwork, school forms — a visual signature is what people actually use and accept.</p>
+      <p><b>Should I draw or upload my signature?</b> Upload for consistency: sign paper once, photograph it, and keep a transparent PNG. Draw if you are on a touchscreen with a stylus. A photographed signature on a transparent background also looks the same on every document, which is what a signature is supposed to do.</p>
+      <p><b>Can I put the signature on any page?</b> Yes. Choose the page, then drag to position and resize it. Match its height roughly to the printed name beneath it and sit it on the line rather than floating above it.</p>
+      <p><b>Is my signed document uploaded?</b> No. Both the signature and the document stay in your browser, which matters because a signature image is reusable by anyone who obtains it. That is worth taking seriously: a signature image can be reused by anyone who obtains it, on any document.</p>
+      <p class="rel">Related: <a href="/pages/fill-form.html">Fill a PDF Form</a> · <a href="/pages/encrypt.html">Encrypt PDF</a> · <a href="/pages/edit.html">Annotate & Markup</a> · <a href="/index.html#tools">All tools</a></p>
+    </article>
   </div>
 </main>
 
@@ -116,7 +236,7 @@
 
 <script src="../js/app.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.min.js";
 (function () {
   const { setupDropzone, validateFile, toast, downloadBytes } = window.PDFLove;
   const $=(id)=>document.getElementById(id);

@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Annotate &amp; Markup PDF — PDFLoveMe</title>
-<meta name="description" content="Add text, highlights, shapes, images and black-out redaction boxes to a PDF. Annotation tool — runs entirely in your browser, files never leave your device.">
+<meta name="description" content="Add text, highlights, lines, images and black-out boxes on top of a PDF. A markup layer, not a rewrite of the original body text — and nothing is uploaded.">
 <link rel="canonical" href="https://pdfloveme.com/pages/edit.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pdfloveme.com/pages/edit.html">
 <meta property="og:title" content="Annotate &amp; Markup PDF — PDFLoveMe">
-<meta property="og:description" content="Add text, highlights, shapes, images and black-out redaction boxes to a PDF. Annotation tool — runs entirely in your browser, files never leave your device.">
+<meta property="og:description" content="Add text, highlights, lines, images and black-out boxes on top of a PDF. A markup layer, not a rewrite of the original body text — and nothing is uploaded.">
 <meta property="og:image" content="https://pdfloveme.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,8 +22,104 @@
 <!-- AdSense loader temporarily disabled (fake ad placeholder in use). Restore when approved:
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../vendor/pdf-lib/pdf-lib-1.17.1.min.js"></script>
+<script src="../vendor/pdfjs/pdf-3.11.174.min.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Annotate & Markup",
+  "url": "https://pdfloveme.com/pages/edit.html",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Any modern browser",
+  "browserRequirements": "Requires JavaScript. No installation, no account.",
+  "description": "Adds text, highlights, shapes, images and black-out boxes as a markup layer on top of an existing PDF, entirely inside the browser.",
+  "featureList": "Add text with colour and size control, highlights, lines and shapes, place images, black-out boxes, markup layered over existing content, browser-only processing, direct download",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "isAccessibleForFree": true,
+  "publisher": {
+    "@type": "Organization",
+    "name": "PDFLoveMe",
+    "url": "https://pdfloveme.com/"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://pdfloveme.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Tools",
+      "item": "https://pdfloveme.com/index.html#tools"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Annotate & Markup",
+      "item": "https://pdfloveme.com/pages/edit.html"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I change the existing text in the PDF?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, and no browser tool can do it reliably — PDFs store positioned marks, not editable paragraphs. Edit the source document and export again. Adding a visible correction and initialling it is the recognised way to amend a document you cannot regenerate."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does a black-out box really hide the text?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Only visually. The text usually remains in the file and can be extracted. For genuine removal, delete the page or redact in the source. This has caused real, public embarrassment for organisations that assumed a black rectangle was enough."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What can I add?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Text with colour and size control, highlights, lines and shapes, images, and black-out boxes — all placed by dragging. Everything is positioned by dragging, so getting a note beside the right paragraph is a matter of putting it there."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my document uploaded?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The markup is applied in your browser and the file is generated locally. The markup is appended as new content, which is why the original text underneath is never disturbed."
+      }
+    }
+  ]
+}
+</script>
+<style>
+  .tool-copy{max-width:820px;margin:34px auto 0}
+  .tool-copy h2{margin-top:30px;font-size:21px}
+  .tool-copy p,.tool-copy li{font-size:16px;line-height:1.75}
+  .tool-copy .rel{margin-top:22px;font-size:15px}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -98,6 +194,30 @@
       <div id="loading" class="hidden"><div class="loading-row"><span class="spinner dark"></span> Working…</div></div>
       <div id="resultArea"></div>
     </div>
+    <article class="tool-copy">
+      <h2>What 'editing' a PDF actually means</h2>
+      <p>People expect a PDF to behave like a word processor document, and it does not. A PDF describes where marks sit on a page; it has no concept of a paragraph that can reflow when you change a word. That is why genuine text editing in a PDF is either impossible or produces mangled spacing.</p>
+      <p>What works reliably is a markup layer: text, highlights, shapes and images placed on top. That is what this tool does, and being clear about it saves a lot of frustration. To change the original wording, edit the source document and export a fresh PDF.</p>
+      <h2>What you can add</h2>
+      <p>Text boxes with adjustable colour and size, for filling gaps, adding notes or correcting a date. Highlights for review. Lines and shapes for pointing at things. Images, for a logo or a stamp. And black-out boxes for covering content.</p>
+      <p>Everything is placed by dragging, so getting a note next to the right paragraph is a matter of putting it there rather than describing a coordinate.</p>
+      <h2>A serious warning about black-out boxes</h2>
+      <p>A black rectangle drawn over text hides it visually and leaves it in the file. The text underneath can usually still be selected, copied or extracted by anyone who thinks to try. This has caused real, public embarrassment for organisations that should have known better.</p>
+      <p>If the information merely needs to be visually de-emphasised, a black box is fine. If it genuinely must not be recoverable, remove the whole page with Delete Pages, or redact it in the source document before exporting.</p>
+      <h2>What to do when you genuinely need to change the words</h2>
+      <p>Sooner or later the answer is not markup. A price is wrong, a name is misspelled, a clause needs rewording — and covering it with a white box and typing over the top produces a document that falls apart the moment someone selects the text or the font does not quite match.</p>
+      <p>The reliable route is to go back to the source. If the PDF came from a word processor or a design tool, fix it there and export again; that takes minutes and produces a clean file. If someone else produced it, ask them — a corrected PDF from the author is worth far more than a patched one from you.</p>
+      <p>Where no source exists, a scanned document being the usual case, be honest about what you are doing. Adding a visible correction and initialling it is a recognised and defensible practice. Silently painting over the old text and typing new words on top is not, and on anything contractual it is the kind of edit that gets noticed at the worst possible moment.</p>
+      <h2>What happens to your files</h2>
+      <p>Every one of these runs in your browser. The file is read from your disk, processed in memory and handed back as a download — there is no upload, no server copy and no account.</p>
+      <p>Markup is appended on top of the existing page content, which is never rewritten or deleted.</p>
+      <h2>Frequently asked questions</h2>
+      <p><b>Can I change the existing text in the PDF?</b> No, and no browser tool can do it reliably — PDFs store positioned marks, not editable paragraphs. Edit the source document and export again. Adding a visible correction and initialling it is the recognised way to amend a document you cannot regenerate.</p>
+      <p><b>Does a black-out box really hide the text?</b> Only visually. The text usually remains in the file and can be extracted. For genuine removal, delete the page or redact in the source. This has caused real, public embarrassment for organisations that assumed a black rectangle was enough.</p>
+      <p><b>What can I add?</b> Text with colour and size control, highlights, lines and shapes, images, and black-out boxes — all placed by dragging. Everything is positioned by dragging, so getting a note beside the right paragraph is a matter of putting it there.</p>
+      <p><b>Is my document uploaded?</b> No. The markup is applied in your browser and the file is generated locally. The markup is appended as new content, which is why the original text underneath is never disturbed.</p>
+      <p class="rel">Related: <a href="/pages/fill-form.html">Fill a PDF Form</a> · <a href="/pages/sign.html">Sign PDF</a> · <a href="/pages/delete-pages.html">Delete Pages</a> · <a href="/index.html#tools">All tools</a></p>
+    </article>
   </div>
 </main>
 
@@ -107,7 +227,7 @@
 
 <script src="../js/app.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.min.js";
 (function () {
   const { setupDropzone, validateFile, toast, downloadBytes } = window.PDFLove;
   const $=(id)=>document.getElementById(id);

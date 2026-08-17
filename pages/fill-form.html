@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fill a PDF Form Online — Free, No Upload</title>
+<meta name="description" content="Fill in a PDF form in your browser: type into real fields, add text to scanned pages, and sign it. Chinese supported, and the file never leaves your device.">
+<link rel="canonical" href="https://pdfloveme.com/pages/fill-form.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pdfloveme.com/pages/fill-form.html">
+<meta property="og:title" content="Fill a PDF Form Online — Free, No Upload">
+<meta property="og:description" content="Fill in a PDF form in your browser: type into real fields, add text to scanned pages, and sign it. Chinese supported, and the file never leaves your device.">
+<meta property="og:image" content="https://pdfloveme.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Fill a PDF Form",
+  "url": "https://pdfloveme.com/pages/fill-form.html",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Any modern browser",
+  "browserRequirements": "Requires JavaScript. No installation, no account.",
+  "description": "Fill in an interactive PDF form or add text and a signature to a flat or scanned PDF, entirely inside the browser. Traditional and Simplified Chinese are supported through an embedded Noto Sans TC subset. Files are never uploaded.",
+  "featureList": "Detects AcroForm fields and lists them for typing, click-to-place text boxes on flat or scanned pages, draggable and resizable boxes, adjustable font size, drawn signature stamped as PNG, multi-page documents, Chinese text support, original page content left unmodified, output generated as a local blob download",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true,
+  "publisher": { "@type": "Organization", "name": "PDFLoveMe", "url": "https://pdfloveme.com/" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://pdfloveme.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://pdfloveme.com/index.html#tools" },
+    { "@type": "ListItem", "position": 3, "name": "Fill a PDF Form", "item": "https://pdfloveme.com/pages/fill-form.html" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Can I fill a scanned PDF that has no form fields?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. If the file has no AcroForm fields, the tool switches to overlay mode: you click where a value belongs, type it, and drag the box into place. The text is stamped on top of the page, which is exactly how a scanned document has to be handled." } },
+    { "@type": "Question", "name": "Does it support Chinese?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. A Noto Sans TC subset covering Big5 and GB2312 common characters is embedded in the output when your text contains non-Latin characters, so Traditional and Simplified Chinese appear correctly instead of as boxes or an error. The font file is served from this site, not a third-party CDN." } },
+    { "@type": "Question", "name": "Will the original text of my document be changed?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Field values are set on the form, and added text and signatures are appended as new content on top of the page. Nothing in the existing content stream is rewritten or deleted, which is verified by an automated test that compares the extracted text before and after." } },
+    { "@type": "Question", "name": "Can anyone see my file?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. The PDF is read by your browser from your own disk and processed in memory. There is no upload, no server, no account and no analytics on the file. Close the tab and nothing remains." } },
+    { "@type": "Question", "name": "Does it work on a multi-page document?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Every page is rendered for preview, form fields from any page are listed together, and in overlay mode each text box and signature is anchored to the page you placed it on." } }
+  ]
+}
+</script>
+
+<script src="../vendor/pdf-lib/pdf-lib-1.17.1.min.js"></script>
+<script src="../vendor/pdf-lib/fontkit-1.1.1.umd.min.js"></script>
+<script src="../vendor/pdfjs/pdf-3.11.174.min.js"></script>
+<script src="../js/fill-pdf-core.js"></script>
+<style>
+  .ff-grid{display:grid;gap:18px;grid-template-columns:1fr}
+  @media(min-width:900px){.ff-grid{grid-template-columns:340px 1fr}}
+  .ff-fields{display:flex;flex-direction:column;gap:10px;max-height:520px;overflow:auto;padding-right:4px}
+  .ff-field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:3px}
+  .ff-field input{width:100%;padding:8px 10px;border:1px solid #d9d9e3;border-radius:8px;font:inherit;font-size:14px}
+  .ff-pagewrap{position:relative;display:inline-block;max-width:100%}
+  .ff-pagewrap canvas{display:block;max-width:100%;height:auto;box-shadow:0 1px 6px rgba(0,0,0,.16)}
+  .ff-box{position:absolute;border:1px dashed #ff6b6b;background:rgba(255,255,255,.72);padding:1px 3px;cursor:move;white-space:pre;line-height:1.15;min-width:14px}
+  .ff-box.sel{border-style:solid;box-shadow:0 0 0 2px rgba(255,107,107,.28)}
+  .ff-box img{display:block;width:100%;height:auto;pointer-events:none}
+  .ff-mode{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+  .ff-status{font-size:13.5px;color:var(--muted);margin:6px 0}
+  .ff-pagebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+  .sigpad{border:1px dashed #c9c9d4;border-radius:10px;background:#fff;touch-action:none}
+  .ff-privacy{border-left:3px solid #2ea36b;background:#f2fbf6;padding:12px 14px;border-radius:8px;font-size:14px;margin:14px 0}
+  .ff-copy{max-width:820px;margin:34px auto 0}
+  .ff-copy h2{margin-top:30px}
+  .ff-copy p,.ff-copy li{font-size:16px;line-height:1.75}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/index.html">PDF<span class="heart">♥</span>Me</a>
+    <nav class="nav">
+      <a href="/index.html#tools">Tools</a>
+      <a href="/index.html#how">How it works</a>
+      <a href="/index.html#faq">FAQ</a>
+      <a href="/blog/index.html">Blog</a>
+      <a href="/pages/about.html">About</a>
+      <a href="/pages/contact.html">Contact</a>
+      <a class="btn coral sm" href="/index.html#tools">Open a tool</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main class="tool-page">
+  <div class="wrap">
+    <div class="crumb"><a href="../index.html">Home</a> / <a href="../index.html#tools">Tools</a> / Fill a PDF Form</div>
+    <div class="tool-hero">
+      <div class="ico">🖊️</div>
+      <h1>Fill a PDF Form Online</h1>
+      <p>Type into a real form, or drop text anywhere on a scanned one. Sign it, download it. Your file never leaves this browser.</p>
+    </div>
+
+    <div class="panel" style="max-width:1100px;">
+      <div class="ff-privacy">
+        <b>Nothing is uploaded.</b> Your PDF is opened by this page from your own disk and edited in memory.
+        There is no server, no account and no copy kept anywhere. The only network request the tool
+        ever makes is a plain <code>GET</code> for the Chinese font on this same domain, which sends
+        nothing about your file. Close the tab and it is gone.
+      </div>
+
+      <div class="dropzone" id="dz" tabindex="0" role="button" aria-label="Add a PDF file">
+        <div class="dz-ico">📄</div>
+        <h3>Drop a PDF here</h3>
+        <p>or <span class="browse">browse</span></p>
+      </div>
+      <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden>
+
+      <div id="work" class="hidden">
+        <p class="ff-status" id="status"></p>
+
+        <div class="ff-mode">
+          <button class="btn ghost sm" id="modeFields">Form fields</button>
+          <button class="btn ghost sm" id="modeOverlay">Add text / signature</button>
+        </div>
+
+        <div class="ff-grid">
+          <div>
+            <div id="fieldsPane">
+              <h3 style="margin:4px 0 8px;font-size:16px;">Form fields</h3>
+              <div class="ff-fields" id="fields"></div>
+            </div>
+
+            <div id="overlayPane" class="hidden">
+              <h3 style="margin:4px 0 8px;font-size:16px;">Add to the page</h3>
+              <p class="ff-status">Click anywhere on the preview to drop a text box, then drag it into place.</p>
+              <div class="field"><label for="boxText">Selected box text</label>
+                <input type="text" id="boxText" placeholder="Type here, e.g. 陳大文"></div>
+              <div class="field" style="margin-top:8px;"><label for="boxSize">Font size: <span id="boxSizeVal">12</span> pt</label>
+                <input type="range" id="boxSize" min="6" max="48" value="12" style="width:100%"></div>
+              <div class="actions" style="margin:8px 0;">
+                <button class="btn ghost sm" id="delBox">Delete selected</button>
+              </div>
+              <h4 style="margin:14px 0 6px;font-size:14px;">Signature</h4>
+              <canvas class="sigpad" id="pad" width="320" height="120"></canvas>
+              <div class="actions" style="margin:8px 0;">
+                <button class="btn ghost sm" id="clearPad">Clear</button>
+                <button class="btn coral sm" id="addSig">Place signature</button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="ff-pagebar">
+              <button class="btn ghost sm" id="prevPage">‹ Prev</button>
+              <span id="pageLabel" class="ff-status" style="margin:0"></span>
+              <button class="btn ghost sm" id="nextPage">Next ›</button>
+            </div>
+            <div class="ff-pagewrap" id="pagewrap"><canvas id="pv"></canvas></div>
+          </div>
+        </div>
+
+        <div class="actions" style="margin-top:14px;">
+          <button class="btn coral" id="applyBtn">Fill &amp; download PDF</button>
+          <button class="btn ghost" id="resetBtn">Use another file</button>
+        </div>
+      </div>
+
+      <div id="loading" class="hidden"><div class="loading-row"><span class="spinner dark"></span> Working…</div></div>
+      <div id="resultArea"></div>
+    </div>
+
+    <!-- ================= copy ================= -->
+    <article class="ff-copy">
+      <h2>Two kinds of PDF, two different problems</h2>
+      <p>A PDF form is one of two things, and which one you have decides everything about how you fill it. The first kind was built as a form: it carries <b>AcroForm</b> fields, invisible boxes the author defined, and a reader can type straight into them. The second kind only looks like a form. It is a scan, an export, or a design file flattened to paper — the lines and the words "Full name" are just marks on a page, with nothing behind them to type into.</p>
+      <p>Most people meet the second kind and assume something is broken. Nothing is broken; there is simply nothing there to click. This tool handles both, and tells you which one you have the moment you open the file.</p>
+
+      <h2>If the file has real fields</h2>
+      <p>The tool reads the form, lists every text field by name down the left, and you type into them like any other form. When you download, those values are written into the fields themselves, so the file stays a proper PDF form — someone opening it later still sees a structured document, not a picture of one.</p>
+
+      <h2>If it does not</h2>
+      <p>You get overlay mode. Click the spot on the preview where a value belongs, type it, and drag the box until it sits on the line. Font size is adjustable, boxes can be moved after the fact, and each one is anchored to the page you placed it on, so a ten-page contract behaves the way you would expect. On download, the text is stamped onto the page as new content.</p>
+      <p>The important part is what stays untouched. Adding text does not rewrite the document — the existing content is left exactly as it was and your additions are appended on top. That is checked by an automated test that extracts the text before and after and compares it character by character, so "we didn't change your document" is a verified claim rather than a reassuring sentence.</p>
+
+      <h2>Chinese, and why it usually fails elsewhere</h2>
+      <p>Most browser PDF tools fall over on Chinese, and the reason is technical rather than careless: the fonts built into the PDF standard only cover Latin characters, so writing 陳大文 with them throws an encoding error. This tool embeds a Noto Sans TC subset — Big5 and GB2312 common characters, about 6,900 glyphs — whenever your text contains anything outside Latin-1. Traditional and Simplified both come out as readable text, not boxes. The font is served from this site, so it works even when a third-party CDN is down or blocked.</p>
+
+      <h2>Signing</h2>
+      <p>Draw your signature in the pad with a mouse, trackpad or finger, and place it like any other box. It is converted to a transparent PNG and stamped onto the page. This is a <b>visual</b> signature, the same as signing a printout and scanning it — it is not a certificate-based digital signature, and anything that legally requires one needs a dedicated e-sign service.</p>
+
+      <h2>When people actually use this</h2>
+      <p>A job application that arrives as a scan the evening before the deadline. A tenancy agreement where the agent needs your details and a signature back today. A government form you would otherwise print, fill in by hand, photograph badly and send. A quotation that needs a countersignature before it can go out. In every one of those the document contains something you would rather not hand to a website — an address, an ID number, a salary figure, a signature.</p>
+
+      <h2>Privacy, stated plainly</h2>
+      <p>The file is read from your disk by the browser and processed in memory. There is no upload step, no server that receives the document, no account, and no copy retained. Being exact about the one network request that does exist: when your text contains Chinese, the page issues a <code>GET</code> for the bundled font file from this same domain. That request carries no data — no body, no query, nothing about your document — and it is the only one. There is no <code>XMLHttpRequest</code>, no WebSocket and no <code>sendBeacon</code> anywhere in the tool, and the PDF libraries are served from this domain rather than a third-party CDN. Close the tab and everything is discarded.</p>
+
+      <h2>Frequently asked questions</h2>
+      <p><b>Can I fill a scanned PDF that has no form fields?</b> Yes — that is overlay mode. Click where the value belongs, type it, drag it into position. It is the only correct way to handle a scan, because there is no field to fill.</p>
+      <p><b>Does it support Chinese?</b> Yes, Traditional and Simplified. A Noto Sans TC subset is embedded into the output whenever your text needs it, so characters appear properly instead of as boxes or an error.</p>
+      <p><b>Will the original text of my document be changed?</b> No. Field values are set on the form and added text is appended on top. The existing content stream is never rewritten, and an automated test verifies the extracted text is identical before and after.</p>
+      <p><b>Can anyone see my file?</b> No. It never leaves your browser. There is no upload and no server involved in the editing.</p>
+      <p><b>Does it work on a multi-page document?</b> Yes. Fields from every page are listed together, and in overlay mode each item is anchored to its own page.</p>
+
+      <p style="margin-top:22px">Related: <a href="/pages/sign.html">Sign a PDF</a> · <a href="/pages/merge.html">Merge PDFs</a> · <a href="/pages/compress.html">Compress a PDF</a> · <a href="/blog/why-your-pdf-form-wont-work-and-how-to-fix-it.html">Why your PDF form won't let you type</a> · <a href="/index.html#tools">All tools</a></p>
+    </article>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap"><div class="footer-bottom"><span>© 2026 PDFLoveMe</span><a href="../index.html">Back to home</a></div></div>
+</footer>
+
+<script src="../js/app.js"></script>
+<script src="../js/fill-form.js"></script>
+</body>
+</html>

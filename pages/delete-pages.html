@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Delete PDF Pages — PDFLoveMe</title>
-<meta name="description" content="Remove unwanted pages from a PDF visually. Runs entirely in your browser — files never leave your device.">
+<meta name="description" content="Click the pages you do not want and export a clean PDF with the rest. Useful for stripping blank scans, cover sheets and pages you should not be sharing.">
 <link rel="canonical" href="https://pdfloveme.com/pages/delete-pages.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pdfloveme.com/pages/delete-pages.html">
 <meta property="og:title" content="Delete PDF Pages — PDFLoveMe">
-<meta property="og:description" content="Remove unwanted pages from a PDF visually. Runs entirely in your browser — files never leave your device.">
+<meta property="og:description" content="Click the pages you do not want and export a clean PDF with the rest. Useful for stripping blank scans, cover sheets and pages you should not be sharing.">
 <meta property="og:image" content="https://pdfloveme.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,8 +22,104 @@
 <!-- AdSense loader temporarily disabled (fake ad placeholder in use). Restore when approved:
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="../vendor/pdf-lib/pdf-lib-1.17.1.min.js"></script>
+<script src="../vendor/pdfjs/pdf-3.11.174.min.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Delete Pages",
+  "url": "https://pdfloveme.com/pages/delete-pages.html",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Any modern browser",
+  "browserRequirements": "Requires JavaScript. No installation, no account.",
+  "description": "Removes selected pages from a PDF by clicking page thumbnails and exports the remaining pages as a new document, entirely inside the browser.",
+  "featureList": "Visual page thumbnails, click to mark pages for removal, remaining page count shown, original document unchanged, browser-only processing, direct download",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "isAccessibleForFree": true,
+  "publisher": {
+    "@type": "Organization",
+    "name": "PDFLoveMe",
+    "url": "https://pdfloveme.com/"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://pdfloveme.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Tools",
+      "item": "https://pdfloveme.com/index.html#tools"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Delete Pages",
+      "item": "https://pdfloveme.com/pages/delete-pages.html"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is deleting a page safer than covering it with a black box?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Considerably. A black box usually leaves the text underneath in the file; deleting the page removes the content entirely. If a page contains something that must never be recoverable, removing it beats any form of visual covering, which usually leaves the text in the file."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I undo a selection?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Click a marked page again to keep it. Nothing is applied until you export. Nothing is committed until you export, so the selection is entirely reversible up to that point."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the original file change?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. A new PDF is generated for download and your original stays as it was. That also gives you a safety net: if you export the wrong set, the source is still there to try again."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do the remaining pages lose quality?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. They are copied across as they are, with text and links intact. Only the pages you removed are gone; everything you kept is copied across byte for byte with links and text intact."
+      }
+    }
+  ]
+}
+</script>
+<style>
+  .tool-copy{max-width:820px;margin:34px auto 0}
+  .tool-copy h2{margin-top:30px;font-size:21px}
+  .tool-copy p,.tool-copy li{font-size:16px;line-height:1.75}
+  .tool-copy .rel{margin-top:22px;font-size:15px}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -82,6 +178,33 @@
       <div id="loading" class="hidden"><div class="loading-row"><span class="spinner dark"></span> Rendering preview…</div></div>
       <div id="resultArea"></div>
     </div>
+    <article class="tool-copy">
+      <h2>Removing a page is the only reliable way to remove what is on it</h2>
+      <p>People try to hide information in a PDF by drawing a black rectangle over it. It looks convincing and it does almost nothing — the text underneath is still in the file and can usually be selected, copied or extracted by anyone who thinks to try.</p>
+      <p>Deleting the page removes the content along with it. If a page contains something the recipient should not have, taking the whole page out is the honest fix.</p>
+      <h2>How it works</h2>
+      <p>Every page is rendered as a thumbnail. Click the ones you want gone; click again to change your mind. The count of remaining pages updates as you go, which is a useful sanity check when a document has to come in at a specific length.</p>
+      <p>Export, and a new PDF is built from the pages you kept. The file on your disk is not modified.</p>
+      <h2>The everyday cases</h2>
+      <p>Blank backs from a double-sided scan. Fax cover sheets. The internal pricing page in a document going to a client. Duplicated pages from a scanner that grabbed two sheets. Terms and conditions nobody asked for on the end of a quotation.</p>
+      <p>It is also how you trim a document down to a page limit, which application forms and court filings are unreasonably fond of imposing.</p>
+      <h2>A note on page ranges versus clicking</h2>
+      <p>Clicking thumbnails is the right approach when you are removing scattered pages — a blank back here, a duplicate there. It is the wrong approach for removing a contiguous block of thirty pages, where clicking each one is tedious and error-prone.</p>
+      <p>For a large contiguous removal, think of it the other way round and use <a href="/pages/split.html">Split PDF</a> to extract the pages you are keeping. Same result, far fewer clicks, and much less scope for missing one in the middle of a long run.</p>
+      <h2>Count the pages before and after</h2>
+      <p>The single most useful habit with this tool is checking the resulting page count against what you expect. Removing four pages from a forty-page document should leave thirty-six; if it leaves thirty-five, you clicked one you did not mean to, and it is far easier to notice now than after the file has been sent.</p>
+      <p>Watch for near-duplicate pages in particular. Scanners that grab two sheets at once produce pages that look almost identical at thumbnail size, and it is genuinely easy to delete the wrong one of a pair. Zoom in on anything ambiguous rather than trusting the thumbnail.</p>
+      <p>Finally, keep the original. Deleting produces a new file and leaves yours alone, which means the recovery from a mistake is simply to run it again — but only if you have not overwritten the source in the meantime.</p>
+      <h2>What happens to your files</h2>
+      <p>Every one of these runs in your browser. The file is read from your disk, processed in memory and handed back as a download — there is no upload, no server copy and no account.</p>
+      <p>Kept pages are copied across unchanged, so text stays selectable and quality is untouched.</p>
+      <h2>Frequently asked questions</h2>
+      <p><b>Is deleting a page safer than covering it with a black box?</b> Considerably. A black box usually leaves the text underneath in the file; deleting the page removes the content entirely. If a page contains something that must never be recoverable, removing it beats any form of visual covering, which usually leaves the text in the file.</p>
+      <p><b>Can I undo a selection?</b> Yes. Click a marked page again to keep it. Nothing is applied until you export. Nothing is committed until you export, so the selection is entirely reversible up to that point.</p>
+      <p><b>Does the original file change?</b> No. A new PDF is generated for download and your original stays as it was. That also gives you a safety net: if you export the wrong set, the source is still there to try again.</p>
+      <p><b>Do the remaining pages lose quality?</b> No. They are copied across as they are, with text and links intact. Only the pages you removed are gone; everything you kept is copied across byte for byte with links and text intact.</p>
+      <p class="rel">Related: <a href="/pages/split.html">Split PDF</a> · <a href="/pages/organize.html">Organize Pages</a> · <a href="/pages/merge.html">Merge PDF</a> · <a href="/index.html#tools">All tools</a></p>
+    </article>
   </div>
 </main>
 
@@ -91,7 +214,7 @@
 
 <script src="../js/app.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.min.js";
 (function () {
   const { setupDropzone, validateFile, toast, downloadBytes } = window.PDFLove;
   let pdfBytes = null, pageCount = 0;
