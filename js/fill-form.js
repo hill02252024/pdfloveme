@@ -15,7 +15,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.mi
   const core = window.PDFFillCore;
   const $ = (id) => document.getElementById(id);
 
-  const FONT_URL = "../vendor/fonts/NotoSansTC-Regular-subset.ttf";
+  const FONT_URL = "../vendor/fonts/NotoSansTC-HKSCS-subset.ttf";
   let fontBytes = null;          // lazily loaded, and only from our own origin
   let fontPromise = null;        // so two rapid CJK edits do not fetch it twice
 

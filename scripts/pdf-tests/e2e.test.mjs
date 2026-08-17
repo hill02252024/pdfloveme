@@ -20,6 +20,9 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, "../..");
 const BREAK = process.argv.includes("--break");
 const TOL = 3; // pt
+const OUT = path.join(HERE, "out");
+let counter = 0;
+await fs.mkdir(OUT, { recursive: true });
 
 // ---------- 一個最小靜態伺服器（file:// 會令 fetch 同 worker 失敗）----------
 const MIME = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css",
@@ -117,15 +120,24 @@ async function clickCanvasFrac(fx, fy) {
   await cv.click({ position: { x: box.width * fx, y: box.height * fy } });
 }
 
-async function download() {
+/**
+ * Click apply and capture the produced file.
+ *
+ * When `keep` is given the bytes are also written to out/, where
+ * render.test.mjs picks them up. That step rasterises these exact files
+ * and counts pixels — text extraction alone cannot tell a rendered
+ * character from an invisible one.
+ */
+async function download(keep) {
   const [dl] = await Promise.all([
     page.waitForEvent("download", { timeout: 30000 }),
     page.click("#applyBtn"),
   ]);
-  const tmp = path.join(HERE, ".out-" + Date.now() + ".pdf");
+  const tmp = path.join(HERE, ".out-" + counter++ + ".pdf");
   await dl.saveAs(tmp);
   const bytes = await fs.readFile(tmp);
   await fs.unlink(tmp);
+  if (keep && !BREAK) await fs.writeFile(path.join(OUT, keep), bytes);
   return bytes;
 }
 
@@ -138,7 +150,7 @@ console.log("\n[B1-1] 平面 PDF —— 撳已知座標、輸入文字、下載"
   const FX = 0.30, FY = 0.42;
   await clickCanvasFrac(FX, FY);
   await page.fill("#boxText", "E2EMARK");
-  const bytes = await download();
+  const bytes = await download("e2e-flat.pdf");
 
   const items = await textItems(bytes);
   const hit = items.find((i) => i.str.includes("E2EMARK"));
@@ -210,7 +222,7 @@ console.log("\n[B1-3] AcroForm —— 欄位列出並填寫");
   check("列出 3 個文字欄位", n === 3, String(n));
   await page.fill('#fields input[data-name="applicant_name"]', "E2E Person");
   await page.fill('#fields input[data-name="applicant_phone"]', "9123 4567");
-  const bytes = await download();
+  const bytes = await download("e2e-acroform.pdf");
 
   const { PDFDocument } = await import("pdf-lib");
   const doc = await PDFDocument.load(bytes);
@@ -245,7 +257,7 @@ console.log("\n[B1-4] 三頁中文 —— 逐頁疊加，並驗字體按需載�
   await page.waitForTimeout(400);
   await clickCanvasFrac(0.25, 0.20);
   await page.fill("#boxText", "香港九龍");
-  const bytes = await download();
+  const bytes = await download("e2e-chinese.pdf");
 
   const items = await textItems(bytes);
   const p1 = items.find((i) => i.page === 0 && i.str.includes("陳大文"));
@@ -287,6 +299,23 @@ console.log("\n[B1-5] 簽名 —— 畫、放置、下載");
 
 await browser.close();
 server.close();
+
+// Hand the three produced files to render.test.mjs, which rasterises them
+// and checks that the text is actually visible rather than merely present.
+if (!BREAK) {
+  await fs.writeFile(path.join(OUT, "manifest.json"), JSON.stringify({
+    cases: [
+      { label: "平面 PDF 疊字", file: "e2e-flat.pdf", fixture: "form-flat.pdf",
+        runs: [{ page: 0, text: "E2EMARK", size: 12, cjk: false }] },
+      { label: "英文 AcroForm", file: "e2e-acroform.pdf", fixture: "form-acroform.pdf",
+        widgets: [{ field: "applicant_name", text: "E2E Person", size: 12 },
+                  { field: "applicant_phone", text: "9123 4567", size: 12 }] },
+      { label: "三頁中文", file: "e2e-chinese.pdf", fixture: "form-chinese-3page.pdf",
+        runs: [{ page: 0, text: "陳大文", size: 12, cjk: true },
+               { page: 1, text: "香港九龍", size: 12, cjk: true }] },
+    ],
+  }, null, 2), "utf8");
+}
 
 if (BREAK) {
   console.log(`\n[B2 反面對照] 注入 50pt 偏移之後：${fail} 項失敗 / ${pass} 項通過`);

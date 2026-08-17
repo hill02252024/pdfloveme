@@ -6,7 +6,7 @@ import fontkit from "@pdf-lib/fontkit";
 
 const OUT = path.resolve("fixtures");
 await fs.mkdir(OUT, { recursive: true });
-const FONT = "/Users/hill/Desktop/GITHUB_PDF/vendor/fonts/NotoSansTC-Regular-subset.ttf";
+const FONT = "/Users/hill/Desktop/GITHUB_PDF/vendor/fonts/NotoSansTC-HKSCS-subset.ttf";
 const CJK = await fs.readFile(FONT);
 
 // ---------- 1. AcroForm ----------

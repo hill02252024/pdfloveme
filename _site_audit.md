@@ -93,11 +93,35 @@ existing content stream.**
 
 ### C2 — Chinese
 
-`vendor/fonts/NotoSansTC-Regular-subset.ttf`, 1.9 MB. Built from the OFL
-Noto Sans TC variable font: instanced to weight 400, then subset with
-`pyftsubset` to ASCII + CJK punctuation + **Big5 Level 1 (5,401 chars) +
-GB2312 Level 1 (3,755 chars) = 6,888 unique glyphs**. Embedded through
-`@pdf-lib/fontkit` only when the text contains something outside Latin-1.
+`vendor/fonts/NotoSansTC-HKSCS-subset.ttf`, 5.6 MB, built by
+`scripts/build-font-subset.py` from the OFL Noto Sans TC variable font:
+instanced to weight 400, then subset with `pyftsubset` to ASCII + CJK
+punctuation + **Big5-HKSCS + GB2312 = 16,926 code points**. Embedded through
+`@pdf-lib/fontkit`, fetched only when the text contains something outside
+Latin-1.
+
+Two properties of that file are load-bearing and neither is obvious, so the
+build is a checked-in script and both are asserted by
+`scripts/pdf-tests/font-coverage.test.mjs`:
+
+**Coverage must include HKSCS.** The first subset was Big5 Level 1 + GB2312
+Level 1. An audit of 425 common Hong Kong name and address characters found
+seven missing — 埗, 磡, 鰂, 筲, 邨, 脷, 舖 — and four of those are not in Big5
+at any level. A form filler for this city that cannot write 深水埗, 紅磡,
+鰂魚涌, 鴨脷洲 or any 邨 is not finished. HKSCS is the set the Hong Kong
+government defined for exactly this, so that is the line the subset now draws.
+The cost is 1.9 MB → 5.6 MB, paid once, only by users who type Chinese, and
+cached afterwards.
+
+**Every glyph record must be an even number of bytes.** `@pdf-lib/fontkit`
+1.1.1 subsets by copying raw glyph records and then, when the total fits in
+16 bits, writing a short `loca` with `offsets[i] >>>= 1`. That shift is
+unconditional. `pyftsubset` writes glyf with padding 1, which left 2,952 of
+the old font's 5,932 records at an odd length, so every offset after the
+first odd one was wrong by half a byte. **Every Chinese PDF this tool
+produced was blank.** The text extracted perfectly — `/ToUnicode` is a
+separate structure and stays correct — which is why the whole test suite was
+green over it. Padding glyf to 4 bytes fixes it.
 
 ### C3 — privacy claim, verified against the code
 
@@ -119,7 +143,7 @@ All third-party JS now served from this domain. 16 files were repointed off
 vendor/pdf-lib/pdf-lib-1.17.1.min.js          vendor/pdfjs/pdf-3.11.174.min.js
 vendor/pdf-lib/cantoo-pdf-lib-2.3.2.min.js    vendor/pdfjs/pdf.worker-3.11.174.min.js
 vendor/pdf-lib/fontkit-1.1.1.umd.min.js       vendor/jszip-3.10.1.min.js
-vendor/fonts/NotoSansTC-Regular-subset.ttf
+vendor/fonts/NotoSansTC-HKSCS-subset.ttf
 ```
 
 Zero CDN-hosted JavaScript remains. The Google Fonts stylesheet is left in place:
@@ -137,7 +161,19 @@ it is styling, not function, and the site degrades to system fonts without it.
 | `form-chinese-3page.pdf` | 3 pages preserved; Chinese stamped on each page and extracted back correctly, not mojibake; original headings intact |
 
 Plus a negative control: an unfilled file must *not* contain the test values, so
-the assertions cannot pass vacuously. **23 checks, all passing.**
+the assertions cannot pass vacuously.
+
+Four further suites were added on top of that one. Extraction-only testing is
+what let the blank-Chinese bug through, so the harness now goes down to pixels:
+
+| Suite | What it adds | Its control |
+|---|---|---|
+| `coords.test.mjs` | 477 assertions on the coordinate maths, compared against pdf.js's own `convertToPdfPoint` | a wrong conversion must be caught in every one of the 64 configurations |
+| `font-coverage.test.mjs` | 425 HK name/address characters present; no odd-length glyph record | a rare Ext-A character must report missing; an unpadded font must be rejected and must visibly fail to draw |
+| `e2e.test.mjs` | headless Chromium driving the real page — click, type, drag, sign, download — positions within ±3pt | a 50pt offset injected at the UI/core boundary must fail the position assertions |
+| `render.test.mjs` | rasterises what the E2E produced and counts pixels: ink present, ink the right width, strokes inside each glyph, glyphs not all identical | drawing nothing, and drawing Chinese with a Latin-only font in three different `.notdef` shapes, must all fail |
+
+**558 checks across five suites, all passing**, with every control firing.
 
 ---
 

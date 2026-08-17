@@ -9,7 +9,7 @@ import fontkit from "@pdf-lib/fontkit";
 const require = createRequire(import.meta.url);
 const REPO = "/Users/hill/Desktop/GITHUB_PDF";
 const CORE = path.join(REPO, "js/fill-pdf-core.js");
-const FONT = path.join(REPO, "vendor/fonts/NotoSansTC-Regular-subset.ttf");
+const FONT = path.join(REPO, "vendor/fonts/NotoSansTC-HKSCS-subset.ttf");
 
 // 用返 repo 入面嗰個檔案本身，唔係另一份 copy
 new Function(await fs.readFile(CORE, "utf8"))();
