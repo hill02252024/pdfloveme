@@ -37,19 +37,55 @@ the banner and in the privacy section. Re-grep after any change to `js/fill-form
   names and addresses. Rare characters — some Hong Kong personal-name characters
   in particular — fall outside it and will not render. The fix is a larger subset
   at the cost of file size; 1.9 MB was judged the right trade.
+- **The font now loads on demand**, the moment a CJK character is typed, with a
+  visible loading line and a readable error if it fails — it never silently
+  degrades to boxes. A Latin-only fill makes no network request at all, which
+  the E2E suite asserts rather than merely claims.
 - **Visual signature only.** Not a certificate-based digital signature, and the
   page says so plainly.
 - **Encrypted PDFs** load with `ignoreEncryption`, which works for permission-only
   protection but not for a file that needs an open password. Unlock it first.
 
-## Testing gap
+## Testing — what is now covered, and what still is not
 
-`scripts/pdf-tests/` exercises the *core* — the same `js/fill-pdf-core.js` the
-browser loads — against three real documents, and that is where all the PDF
-correctness lives. What is **not** automated is the browser UI itself: the
-click-to-place, drag, page navigation and signature pad were written against the
-existing `sign.html` patterns and reasoned through, but not driven by a headless
-browser. A Playwright pass over `pages/fill-form.html` is the obvious next step.
+`scripts/pdf-tests/` (dev-only; the site ships no npm dependencies). Three
+suites, each with a negative control, because a test that cannot fail proves
+nothing.
+
+- **`run-tests.mjs`** — the core against three real documents. Asserts the
+  original text is byte-identical before and after.
+- **`coords.test.mjs`** — 477 assertions on the coordinate maths, compared
+  against **pdf.js's own `convertToPdfPoint`** rather than hand-computed
+  numbers. 4 page sizes × 4 rotations × 4 scales × 7 positions, plus
+  devicePixelRatio invariance, the Y-flip, and rotation normalisation. Control:
+  a deliberately wrong conversion must be caught in every configuration.
+- **`e2e.test.mjs`** — headless Chromium against the real page: click, type,
+  drag, sign, download, then read the produced PDF back and assert positions
+  within ±3pt. Control: `--break` injects a 50pt offset and the position
+  assertions must fail.
+
+**The E2E gap named in the previous run is now closed.** Three real bugs came
+out of it, all of which would have shipped:
+
+1. Baseline offset went the wrong direction on 90°/270° pages — text landed
+   22pt from the click.
+2. `constructor.name` is mangled by the minified pdf-lib the browser loads, so
+   **every AcroForm field list was empty for real users**. The Node suite could
+   not see it: it loads the unminified package. Fixed by using `instanceof`.
+3. Drag read a detached element's rect (zeros), slamming every dragged box to
+   the left edge of the page.
+
+### Still not automated
+
+- **Touch input.** The pad and drag handlers bind `touchstart`/`touchmove`, but
+  the E2E suite drives a mouse. Untested on a real touchscreen.
+- **Mobile layout.** Only one viewport (1400×1200) is exercised.
+- **Visual rendering.** Assertions are on extracted text coordinates, not on
+  pixels. A font that embeds but renders as blank boxes would pass.
+- **Very large documents.** Fixtures are 1–3 pages; nothing measures behaviour
+  or memory on a 200-page scan.
+- **Checkboxes, radios, dropdowns.** Detected and labelled non-editable; the
+  fill path for them does not exist, so there is nothing to test yet.
 
 ## Sitemap generator
 

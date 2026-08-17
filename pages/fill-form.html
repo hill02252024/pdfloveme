@@ -120,9 +120,10 @@
     <div class="panel" style="max-width:1100px;">
       <div class="ff-privacy">
         <b>Nothing is uploaded.</b> Your PDF is opened by this page from your own disk and edited in memory.
-        There is no server, no account and no copy kept anywhere. The only network request the tool
-        ever makes is a plain <code>GET</code> for the Chinese font on this same domain, which sends
-        nothing about your file. Close the tab and it is gone.
+        There is no server, no account and no copy kept anywhere. If you only type Latin text, the tool
+        makes <b>no network request at all</b> once the page has loaded. Type a Chinese character and it
+        fetches one file — the font — from this same domain, with nothing about your document attached.
+        Close the tab and it is gone.
       </div>
 
       <div class="dropzone" id="dz" tabindex="0" role="button" aria-label="Add a PDF file">
@@ -134,6 +135,8 @@
 
       <div id="work" class="hidden">
         <p class="ff-status" id="status"></p>
+        <p class="ff-status hidden" id="fontState" role="status" aria-live="polite"
+           style="font-weight:600"></p>
 
         <div class="ff-mode">
           <button class="btn ghost sm" id="modeFields">Form fields</button>
@@ -209,13 +212,15 @@
       <p>A job application that arrives as a scan the evening before the deadline. A tenancy agreement where the agent needs your details and a signature back today. A government form you would otherwise print, fill in by hand, photograph badly and send. A quotation that needs a countersignature before it can go out. In every one of those the document contains something you would rather not hand to a website — an address, an ID number, a salary figure, a signature.</p>
 
       <h2>Privacy, stated plainly</h2>
-      <p>The file is read from your disk by the browser and processed in memory. There is no upload step, no server that receives the document, no account, and no copy retained. Being exact about the one network request that does exist: when your text contains Chinese, the page issues a <code>GET</code> for the bundled font file from this same domain. That request carries no data — no body, no query, nothing about your document — and it is the only one. There is no <code>XMLHttpRequest</code>, no WebSocket and no <code>sendBeacon</code> anywhere in the tool, and the PDF libraries are served from this domain rather than a third-party CDN. Close the tab and everything is discarded.</p>
+      <p>The file is read from your disk by the browser and processed in memory. There is no upload step, no server that receives the document, no account, and no copy retained.</p>
+      <p>Being exact about network activity, because a privacy claim that is nearly true is not one. Fill a form using only Latin characters and the tool issues <b>zero requests</b> after the page itself has loaded — the PDF libraries are already in memory and nothing else is needed. The moment you type a character outside Latin-1, it fetches exactly one file: the Chinese font, by <code>GET</code>, from this same domain. That request has no body, no query string and carries nothing about your document; it exists because the fonts built into the PDF format cannot encode Chinese. You will see it happen — a line appears saying the font is loading, and if it fails you get an error rather than silent garbled output.</p>
+      <p>There is no <code>XMLHttpRequest</code>, no WebSocket and no <code>sendBeacon</code> anywhere in the tool, and every library is served from this domain rather than a third-party CDN. Close the tab and everything is discarded.</p>
 
       <h2>Frequently asked questions</h2>
       <p><b>Can I fill a scanned PDF that has no form fields?</b> Yes — that is overlay mode. Click where the value belongs, type it, drag it into position. It is the only correct way to handle a scan, because there is no field to fill.</p>
       <p><b>Does it support Chinese?</b> Yes, Traditional and Simplified. A Noto Sans TC subset is embedded into the output whenever your text needs it, so characters appear properly instead of as boxes or an error.</p>
       <p><b>Will the original text of my document be changed?</b> No. Field values are set on the form and added text is appended on top. The existing content stream is never rewritten, and an automated test verifies the extracted text is identical before and after.</p>
-      <p><b>Can anyone see my file?</b> No. It never leaves your browser. There is no upload and no server involved in the editing.</p>
+      <p><b>Can anyone see my file?</b> No. It never leaves your browser — there is no upload and no server involved in the editing. A Latin-only fill makes no network request whatsoever; typing Chinese fetches the font from this domain and nothing else.</p>
       <p><b>Does it work on a multi-page document?</b> Yes. Fields from every page are listed together, and in overlay mode each item is anchored to its own page.</p>
 
       <p style="margin-top:22px">Related: <a href="/pages/sign.html">Sign a PDF</a> · <a href="/pages/merge.html">Merge PDFs</a> · <a href="/pages/compress.html">Compress a PDF</a> · <a href="/blog/why-your-pdf-form-wont-work-and-how-to-fix-it.html">Why your PDF form won't let you type</a> · <a href="/index.html#tools">All tools</a></p>

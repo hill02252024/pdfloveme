@@ -17,6 +17,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.mi
 
   const FONT_URL = "../vendor/fonts/NotoSansTC-Regular-subset.ttf";
   let fontBytes = null;          // lazily loaded, and only from our own origin
+  let fontPromise = null;        // so two rapid CJK edits do not fetch it twice
 
   let srcBytes = null;           // the untouched original
   let pdfDoc = null;             // pdf.js document, preview only
@@ -26,14 +27,67 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.mi
   let boxes = [];                // { page, xFrac, yFrac, text?, png?, url?, size, wFrac, el }
   let selected = null;
 
-  async function ensureFont() {
-    if (fontBytes) return fontBytes;
-    // Same-origin asset, fetched only to embed a glyph subset — no document
-    // data is sent anywhere by this request.
-    const res = await fetch(FONT_URL);
-    if (!res.ok) throw new Error("Could not load the bundled Chinese font.");
-    fontBytes = new Uint8Array(await res.arrayBuffer());
-    return fontBytes;
+  /**
+   * Load the Chinese font, once, and only when something actually needs it.
+   *
+   * A purely Latin fill never triggers this, so an English-only session
+   * makes no network request at all after the page has loaded. The request
+   * is a same-origin GET with no body — nothing about the document is sent.
+   */
+  function ensureFont() {
+    if (fontBytes) return Promise.resolve(fontBytes);
+    if (fontPromise) return fontPromise;
+    setFontState("loading");
+    fontPromise = fetch(FONT_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.arrayBuffer();
+      })
+      .then((buf) => {
+        fontBytes = new Uint8Array(buf);
+        setFontState("ready");
+        return fontBytes;
+      })
+      .catch((err) => {
+        fontPromise = null;
+        setFontState("error");
+        // Fail loudly. Falling back to a Latin font here would silently
+        // turn 陳大文 into boxes, or throw an encoding error deep inside
+        // pdf-lib with no explanation.
+        throw new Error(
+          "The Chinese font could not be loaded (" + err.message + "), so " +
+          "Chinese text cannot be written into the PDF. Check your connection " +
+          "and try again — Latin-only text still works.");
+      });
+    return fontPromise;
+  }
+
+  /** Visible state for the font load, so it never fails silently. */
+  function setFontState(state) {
+    const el = $("fontState");
+    if (!el) return;
+    el.classList.remove("hidden");
+    if (state === "loading") {
+      el.textContent = "Loading the Chinese font (about 1.9 MB, once per visit)…";
+      el.dataset.state = "loading";
+    } else if (state === "ready") {
+      el.textContent = "Chinese font ready.";
+      el.dataset.state = "ready";
+      setTimeout(() => { if (el.dataset.state === "ready") el.classList.add("hidden"); }, 2500);
+    } else {
+      el.textContent = "The Chinese font failed to load. Chinese text cannot be added until it does.";
+      el.dataset.state = "error";
+    }
+  }
+
+  /**
+   * Start loading the font as soon as the user types a CJK character,
+   * rather than waiting until they press the download button.
+   */
+  function maybePrefetchFont(text) {
+    if (!fontBytes && !fontPromise && core.needsUnicodeFont(text)) {
+      ensureFont().catch(() => { /* state is already shown */ });
+    }
   }
 
   // ---------------- load ----------------
@@ -92,6 +146,12 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.mi
       wrap.appendChild(row);
     });
   }
+
+  // Same for the AcroForm field inputs, which are created dynamically.
+  document.addEventListener("input", (e) => {
+    const t = e.target;
+    if (t && t.matches && t.matches("#fields input[data-name]")) maybePrefetchFont(t.value);
+  });
 
   function setMode(m) {
     mode = m;
@@ -155,10 +215,11 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.mi
     if (mode !== "overlay") return;
     if (e.target.closest(".ff-box")) return;
     const cv = $("pv"), r = cv.getBoundingClientRect();
+    const f = core.clientPointToFrac(e.clientX, e.clientY, r);
     const b = {
       page: pageNum - 1,
-      xFrac: (e.clientX - r.left) / r.width,
-      yFrac: (e.clientY - r.top) / r.height,
+      xFrac: f.fracX,
+      yFrac: f.fracY,
       text: "", size: parseInt($("boxSize").value, 10) || 12,
     };
     boxes.push(b); select(b);
@@ -168,6 +229,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.mi
   $("boxText").addEventListener("input", () => {
     if (!selected || selected.png) return;
     selected.text = $("boxText").value;
+    maybePrefetchFont(selected.text);
     layoutBoxes();
   });
   $("boxSize").addEventListener("input", () => {
@@ -184,16 +246,24 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.mi
   function evXY(e) { return e.touches ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY }; }
   function startDrag(e, b, el) {
     e.preventDefault(); e.stopPropagation();
-    select(b);
+    // Measure BEFORE select(), because select() calls layoutBoxes(), which
+    // removes this element and builds a fresh one. A detached element's
+    // getBoundingClientRect() is all zeros, which made every drag compute
+    // its grab offset from the viewport origin and slam the box to the
+    // left edge of the page.
     const p = evXY(e), r = el.getBoundingClientRect();
     drag = { b: b, dx: p.x - r.left, dy: p.y - r.top };
+    select(b);
   }
   function onMove(e) {
     if (!drag) return;
     e.preventDefault();
     const cv = $("pv"), r = cv.getBoundingClientRect(), p = evXY(e);
-    drag.b.xFrac = Math.max(0, Math.min(1, (p.x - r.left - drag.dx) / r.width));
-    drag.b.yFrac = Math.max(0, Math.min(1, (p.y - r.top - drag.dy) / r.height));
+    // Convert the box's top-left, not the pointer, so the box does not
+    // jump to the cursor when a drag starts away from its corner.
+    const f = core.clientPointToFrac(p.x - drag.dx, p.y - drag.dy, r);
+    drag.b.xFrac = f.fracX;
+    drag.b.yFrac = f.fracY;
     layoutBoxes();
   }
   window.addEventListener("mousemove", onMove);
