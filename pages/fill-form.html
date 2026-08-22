@@ -19,49 +19,51 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Fill a PDF Form",
-  "url": "https://pdfloveme.com/pages/fill-form.html",
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "Any modern browser",
-  "browserRequirements": "Requires JavaScript. No installation, no account.",
-  "description": "Fill in an interactive PDF form or add text and a signature to a flat or scanned PDF, entirely inside the browser. Traditional and Simplified Chinese are supported through an embedded Noto Sans TC subset. Files are never uploaded.",
-  "featureList": "Detects AcroForm fields and lists them for typing, click-to-place text boxes on flat or scanned pages, draggable and resizable boxes, adjustable font size, drawn signature stamped as PNG, multi-page documents, Chinese text support, original page content left unmodified, output generated as a local blob download",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "isAccessibleForFree": true,
-  "publisher": { "@type": "Organization", "name": "PDFLoveMe", "url": "https://pdfloveme.com/" }
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://pdfloveme.com/" },
-    { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://pdfloveme.com/index.html#tools" },
-    { "@type": "ListItem", "position": 3, "name": "Fill a PDF Form", "item": "https://pdfloveme.com/pages/fill-form.html" }
-  ]
-}
-</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    { "@type": "Question", "name": "Can I fill a scanned PDF that has no form fields?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes. If the file has no AcroForm fields, the tool switches to overlay mode: you click where a value belongs, type it, and drag the box into place. The text is stamped on top of the page, which is exactly how a scanned document has to be handled." } },
-    { "@type": "Question", "name": "Does it support Chinese?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes. A Noto Sans TC subset covering Big5-HKSCS and GB2312 is embedded in the output when your text contains non-Latin characters, so Traditional and Simplified Chinese appear correctly instead of as boxes or an error. HKSCS is the Hong Kong supplementary set, which is what makes 深水埗, 紅磡 and any 邨 writable. The font file is served from this site, not a third-party CDN." } },
-    { "@type": "Question", "name": "Will the original text of my document be changed?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No. Field values are set on the form, and added text and signatures are appended as new content on top of the page. Nothing in the existing content stream is rewritten or deleted, which is verified by an automated test that compares the extracted text before and after." } },
-    { "@type": "Question", "name": "Can anyone see my file?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No. The PDF is read by your browser from your own disk and processed in memory. There is no upload, no server, no account and no analytics on the file. Close the tab and nothing remains." } },
-    { "@type": "Question", "name": "Does it work on a multi-page document?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Every page is rendered for preview, form fields from any page are listed together, and in overlay mode each text box and signature is anchored to the page you placed it on." } }
+    {
+      "@type": "Question",
+      "name": "Can I fill a scanned PDF that has no form fields?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — that is overlay mode. Click where the value belongs, type it, drag it into position. It is the only correct way to handle a scan, because there is no field to fill."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it support Chinese?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, Traditional and Simplified. A Noto Sans TC subset is embedded into the output whenever your text needs it, so characters appear properly instead of as boxes or an error."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Will the original text of my document be changed?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Field values are set on the form and added text is appended on top. The existing content stream is never rewritten, and an automated test verifies the extracted text is identical before and after."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can anyone see my file?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. It never leaves your browser — there is no upload and no server involved in the editing. A Latin-only fill makes no network request whatsoever; typing Chinese fetches the font from this domain and nothing else."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it work on a multi-page document?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Fields from every page are listed together, and in overlay mode each item is anchored to its own page."
+      }
+    }
   ]
 }
 </script>
@@ -90,6 +92,51 @@
   .ff-copy h2{margin-top:30px}
   .ff-copy p,.ff-copy li{font-size:16px;line-height:1.75}
 </style>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Fill PDF Form",
+  "url": "https://pdfloveme.com/pages/fill-form.html",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any (web browser)",
+  "browserRequirements": "Requires JavaScript. No installation and no account.",
+  "description": "Fills interactive AcroForm fields or places text and a drawn signature on a flat or scanned PDF, with Traditional and Simplified Chinese support.",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://pdfloveme.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Tools",
+      "item": "https://pdfloveme.com/index.html#tools"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Fill a PDF Form",
+      "item": "https://pdfloveme.com/pages/fill-form.html"
+    }
+  ]
+}
+</script>
 </head>
 <body>
 <header class="site-header">

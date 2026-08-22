@@ -29,6 +29,27 @@
   "publisher": { "@type": "Organization", "name": "PDFLoveMe", "url": "https://pdfloveme.com/" }
 }
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://pdfloveme.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://pdfloveme.com/blog/"
+    }
+  ]
+}
+</script>
 </head>
 <body>
 <header class="site-header">
@@ -49,7 +70,9 @@
 
 <main class="blog-page">
   <div class="wrap">
-    <div class="blog-hero">
+    
+      <div class="crumb"><a href="/index.html">Home</a> / Blog</div>
+<div class="blog-hero">
       <div class="eyebrow">PDFLoveMe Blog</div>
       <h1>Practical, honest PDF guides</h1>
       <p>How to get real work done with PDFs — merging, converting, compressing, protecting — with a privacy-first approach. No fluff, no upload.</p>
