@@ -3,6 +3,17 @@
 Dev-only. The site itself ships no npm dependencies — everything the browser
 needs is vendored under `/vendor`. Nothing here is deployed.
 
+`tools-smoke.test.mjs` is the exception to the install step: it has no npm
+dependencies. It talks to Chrome over the DevTools protocol through
+`lib/cdp.mjs` and serves the repo itself, so `node tools-smoke.test.mjs`
+works in a clean checkout.
+
+It asserts on the bytes, not on the UI. Each page hands its result over
+through `URL.createObjectURL(blob)`, so the harness patches that call before
+the page loads and reads the blob directly — which is also why a tool that
+downloads without showing a Download button (pdf-to-jpg, fill-form) is
+checked the same way as one that shows a button.
+
 ```
 npm install          # pdf-lib, fontkit, pdfjs-dist, playwright, canvas
 npx playwright install chromium
@@ -20,6 +31,7 @@ break is caught. If a control ever stops failing, treat that suite as void.
 | `coords.test.mjs` | 477 assertions on the coordinate maths, compared against **pdf.js's own `convertToPdfPoint`** — 4 page sizes × 4 rotations × 4 scales × 7 positions, plus devicePixelRatio invariance, the Y-flip and rotation normalisation | a deliberately wrong conversion, which must be caught in *every* configuration |
 | `font-coverage.test.mjs` | 425 common Hong Kong name and address characters are in the subset; no glyph record is odd-length | a rare Ext-A character must be reported missing; an unpadded font must be rejected *and* must visibly fail to render |
 | `e2e.test.mjs` | headless Chromium against the real page: click, type, drag, sign, download; positions within ±3pt | `--break` injects a 50pt offset; the position assertions must fail |
+| `tools-smoke.test.mjs` | all 16 tools end to end in headless Chrome: feed a real 3-page PDF (a JPEG for jpg-to-pdf, encrypt's own output for unlock), work the UI, and assert the file handed back is non-empty and starts with the right magic bytes | `--break` blocks every `/vendor/` request, so no library loads; all 16 must fail |
 | `render.test.mjs` | rasterises the files the E2E produced and counts pixels | draw nothing, and draw Chinese with a font that has no Chinese — both must fail the assertions |
 
 `render.test.mjs` consumes `out/` from `e2e.test.mjs`, so run the E2E first

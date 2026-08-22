@@ -2,7 +2,7 @@
   "name": "pdfloveme-pdf-tests",
   "private": true,
   "type": "module",
-  "description": "Test harness for js/fill-pdf-core.js and pages/fill-form.html. Dev-only — the site itself ships no npm dependencies; everything it needs is vendored under /vendor.",
+  "description": "Test harness for the PDF tools. Dev-only — the site itself ships no npm dependencies; everything it needs is vendored under /vendor. tools-smoke.test.mjs needs no npm packages at all: it drives headless Chrome through lib/cdp.mjs.",
   "scripts": {
     "fixtures": "node make-fixtures.mjs",
     "test:core": "node run-tests.mjs",
@@ -11,7 +11,9 @@
     "test:e2e": "node e2e.test.mjs",
     "test:e2e:control": "node e2e.test.mjs --break",
     "test:render": "node e2e.test.mjs && node render.test.mjs",
-    "test": "node run-tests.mjs && node coords.test.mjs && node font-coverage.test.mjs && node e2e.test.mjs && node render.test.mjs"
+    "test": "node run-tests.mjs && node coords.test.mjs && node font-coverage.test.mjs && node e2e.test.mjs && node render.test.mjs && node tools-smoke.test.mjs",
+    "test:tools": "node tools-smoke.test.mjs",
+    "test:tools:control": "node tools-smoke.test.mjs --break"
   },
   "devDependencies": {
     "@pdf-lib/fontkit": "1.1.1",
