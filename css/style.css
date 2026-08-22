@@ -380,3 +380,34 @@ section { padding: 64px 0; }
    Restore real ads later by deleting just this one rule.
    ============================================================ */
 .ad-slot, .ad-inline { display: none !important; }
+
+/* ── Trust line: the one sentence that has to be on every tool page ──
+   Sits directly under the H1, before the tool's own blurb, so the
+   privacy claim is the first thing read rather than a footnote. */
+.trust-line{
+  margin:10px 0 12px;
+  padding:10px 14px;
+  border-left:3px solid var(--coral,#ff6b5b);
+  background:rgba(255,107,91,.06);
+  border-radius:0 8px 8px 0;
+  font-size:15px;
+  line-height:1.6;
+}
+.trust-line strong{font-weight:600}
+
+/* How-it-works page: plain prose column, no tool chrome. */
+.explainer{max-width:72ch;margin:0 auto}
+.explainer h2{margin:34px 0 10px}
+.explainer h3{margin:22px 0 6px;font-size:17px}
+.explainer p,.explainer li{line-height:1.7}
+.explainer .compare{width:100%;border-collapse:collapse;margin:18px 0;font-size:15px}
+.explainer .compare th,.explainer .compare td{
+  border:1px solid var(--line,#e6e2dd);padding:9px 11px;text-align:left;vertical-align:top}
+.explainer .compare th{background:rgba(0,0,0,.03);font-weight:600}
+
+/* Homepage hero: one featured tool gets a sentence, not just an icon. */
+.hero-featured{
+  margin:0 0 12px;padding:11px 13px;border-radius:10px;
+  background:rgba(255,107,91,.07);font-size:14.5px;line-height:1.6;
+}
+.hero-featured a{color:inherit}

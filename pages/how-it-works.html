@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The PDF Tool That Doesn't Upload Your Files | PDFLoveMe</title>
+<meta name="description" content="How browser-based PDF editing actually works, and why a free tool that never uploads your file is a different thing from one that quietly does.">
+<link rel="canonical" href="https://pdfloveme.com/pages/how-it-works.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://pdfloveme.com/pages/how-it-works.html">
+<meta property="og:title" content="The PDF Tool That Doesn't Upload Your Files | PDFLoveMe">
+<meta property="og:description" content="How browser-based PDF editing actually works, and why a free tool that never uploads your file is a different thing from one that quietly does.">
+<meta property="og:image" content="https://pdfloveme.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!-- AD_SLOT: how-it-works-leaderboard -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://pdfloveme.com/" },
+    { "@type": "ListItem", "position": 2, "name": "How it works", "item": "https://pdfloveme.com/pages/how-it-works.html" }
+  ]
+}
+</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/index.html">PDF<span class="heart">♥</span>Me</a>
+    <nav class="nav">
+      <a href="/index.html#tools">Tools</a>
+      <a href="/pages/how-it-works.html">How it works</a>
+      <a href="/index.html#faq">FAQ</a>
+      <a href="/blog/index.html">Blog</a>
+      <a href="/pages/about.html">About</a>
+      <a href="/pages/contact.html">Contact</a>
+      <a class="btn coral sm" href="/index.html#tools">Open a tool</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main class="tool-page">
+  <div class="wrap">
+    <div class="crumb"><a href="../index.html">Home</a> / How it works</div>
+
+    <article class="explainer">
+      <h1>Why nothing you open here is ever uploaded</h1>
+      <p class="trust-line"><strong>Nothing you open here is uploaded.</strong> The file is read from your own disk, worked on in memory, and handed back as a download. No server ever receives it, and closing the tab discards everything.</p>
+
+      <p>Most free PDF tools work the same way underneath: you pick a file, the browser posts it to a server, something happens on that server, and a link comes back. That model is not evil — it is just how you build a PDF tool if you want it to run anywhere. But it does mean a copy of your document sits on somebody else's disk for as long as their retention policy says, and you have to take their word for what that policy is.</p>
+
+      <p>This site does it the other way round. The PDF never moves.</p>
+
+      <h2>What actually happens when you drop a file in</h2>
+
+      <p>When you choose a file, the browser hands the page a <code>File</code> object. That object is a handle to bytes on your own disk — not a copy on a server. The page reads those bytes into an <code>ArrayBuffer</code>, which is memory belonging to that one tab.</p>
+
+      <p>From there, two libraries do the work, and both of them are ordinary JavaScript running in that tab:</p>
+
+      <ul>
+        <li><strong>pdf-lib</strong> parses the PDF structure and writes a new one. Merging is copying page objects from several documents into a new document; rotating is setting a value on a page dictionary; deleting is leaving pages out of the output. None of it needs a server, because a PDF is a document format, not a service.</li>
+        <li><strong>pdf.js</strong> renders pages to a canvas so you can see what you are about to change. It is the same engine Firefox uses to display PDFs, which is a decent hint that a browser is a perfectly capable PDF environment.</li>
+      </ul>
+
+      <p>When you press the button, the result is assembled as a <code>Blob</code>, a URL is created for it with <code>URL.createObjectURL</code>, and your browser downloads it. That is why the download appears instantly instead of after a wait — there is no round trip to wait for.</p>
+
+      <h2>The difference this makes, concretely</h2>
+
+      <table class="compare">
+        <thead><tr><th></th><th>Server-side tool</th><th>This site</th></tr></thead>
+        <tbody>
+          <tr><td>Where the file goes</td><td>Uploaded to their infrastructure</td><td>Stays on your disk and in your tab</td></tr>
+          <tr><td>Who can read it</td><td>Anyone with access to that server</td><td>You, and whoever can already read your disk</td></tr>
+          <tr><td>Retention</td><td>Whatever their policy says</td><td>Discarded when you close the tab</td></tr>
+          <tr><td>Works offline</td><td>No</td><td>Yes, once the page has loaded</td></tr>
+          <tr><td>Account required</td><td>Usually, eventually</td><td>Never</td></tr>
+        </tbody>
+      </table>
+
+      <p>The offline point is worth sitting with, because it is the easiest way to prove the claim to yourself rather than believe it. Load any tool on this site, turn off your wi-fi, then merge two PDFs. It works. A tool that uploads cannot do that, and no amount of privacy copy changes it.</p>
+
+      <h2>What we do not have</h2>
+
+      <p>There is no analytics on this site — no Google Analytics, no Plausible, no Matomo, nothing that records what you opened. There is no account system, so there is nothing to log in to and no profile to attach a file to. There is no server-side code at all: the whole thing is static files on GitHub Pages, which means there is no request handler that <em>could</em> receive a document even if someone wanted to write one.</p>
+
+      <p>Being precise about the one exception: the page itself is served over the network, and the typeface comes from Google Fonts. So your browser does make requests — for the page, the stylesheet and the font. What it never sends is the contents of your PDF.</p>
+
+      <h2>The tool where this matters most</h2>
+
+      <p>Filling in a form is the case where uploading feels worst, because the thing you are typing is usually the sensitive part — an ID number, an address, a signature. <a href="/pages/fill-form.html">Fill a PDF form without uploading it</a> handles both kinds of form: real interactive AcroForm fields, and flat scans with no fields at all, where you click on the preview to place text exactly where a line is printed.</p>
+
+      <p>It also embeds a Noto Sans TC subset covering Big5-HKSCS and GB2312, which means Traditional and Simplified Chinese come out as characters rather than boxes — including the Hong Kong supplementary set, so 深水埗 and 紅磡 write correctly. The font file is served from this domain. And you can draw a signature with a mouse or finger and stamp it onto the page. All of that happens in the tab.</p>
+
+      <h2>Where the limits are</h2>
+
+      <p>Running in a tab has a real cost, and it would be dishonest to skip it. Everything lives in your browser's memory, so files are capped at 50&nbsp;MB each and 20 files at a time. A very large scanned document can make an older phone struggle. And because there is no server doing the work, there is no queue you can leave running while you close the laptop.</p>
+
+      <p>Those are the trade-offs. We think they are the right ones for documents that were never anybody else's business.</p>
+
+      <p class="rel">Next: <a href="/pages/merge.html">merge PDF without uploading</a> · <a href="/pages/fill-form.html">fill a PDF form without uploading</a> · <a href="/pages/compress.html">compress a PDF without upload</a> · <a href="/pages/privacy.html">Privacy Policy</a></p>
+    </article>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>© 2026 PDFLoveMe · <a href="/pages/privacy.html">Privacy</a> · <a href="/pages/terms.html">Terms</a> · <a href="/pages/about.html">About</a> · <a href="/pages/contact.html">Contact</a></p>
+  </div>
+</footer>
+<script src="../js/app.js" defer></script>
+</body>
+</html>

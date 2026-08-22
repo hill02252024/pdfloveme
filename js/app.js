@@ -7,6 +7,10 @@
   // ---- Tier configuration ----
   const TIER = {
     free: { maxBytes: 50 * 1024 * 1024, maxFiles: 20, label: "Free" },
+    // Not offered for sale and not reachable through any purchase flow. It
+    // exists only because localStorage.pdfloveme_tier can be set by hand for
+    // local testing. Nothing in the UI advertises it and the terms state the
+    // site is free — do not surface it without building a real tier first.
     pro:  { maxBytes: 500 * 1024 * 1024, maxFiles: 100, label: "Pro" },
   };
 
@@ -51,7 +55,7 @@
         ok: false,
         reason: file.name + " is " + fmtSize(file.size) + " — exceeds the " +
           cfg.label + " limit of " + fmtSize(cfg.maxBytes) +
-          (currentTier() === "free" ? ". Upgrade to Pro for larger files." : "."),
+          ".",
       };
     }
     return { ok: true };
@@ -66,7 +70,7 @@
         ok: false,
         accepted,
         reason: "Too many files. " + cfg.label + " allows up to " + cfg.maxFiles + " files" +
-          (currentTier() === "free" ? ". Upgrade to Pro for up to 100." : "."),
+          ".",
       };
     }
     for (const f of newFiles) {
