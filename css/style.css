@@ -411,3 +411,13 @@ section { padding: 64px 0; }
   background:rgba(255,107,91,.07);font-size:14.5px;line-height:1.6;
 }
 .hero-featured a{color:inherit}
+
+/* 相關工具區塊（階段 5） */
+.related{margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--line,#e6e6e6)}
+.related h2{margin-bottom:.75rem}
+.related-list{list-style:none;padding:0;margin:0 0 1rem;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.5rem}
+.related-list a{display:block;padding:.6rem .8rem;border:1px solid var(--line,#e6e6e6);
+  border-radius:8px;text-decoration:none}
+.related-list a:hover{border-color:var(--coral,#ff6b5a)}
+.read-next{margin:.25rem 0;font-size:.95rem}
