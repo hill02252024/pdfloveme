@@ -1,3 +1,12 @@
+// ⚠️ SUPERSEDED by scripts/build-sitemap.mjs (singular).
+//
+// Kept only so an old muscle-memory `node scripts/build-sitemaps.mjs` still
+// produces the correct file instead of silently regressing the sitemap. It
+// now just delegates. Do not add logic here — edit build-sitemap.mjs.
+await import("./build-sitemap.mjs");
+export {};
+
+/* ---------- original implementation below, retained for reference ----------
 // scripts/build-sitemaps.mjs
 //
 // Single source of truth for sitemap.xml. Same approach as the sibling
@@ -85,3 +94,5 @@ const xml = `<?xml version="1.0" encoding="UTF-8"?>
 
 await fs.writeFile("sitemap.xml", xml, "utf8");
 console.log(`✅ sitemap.xml — ${pages.size} pages`);
+
+---------- end of retained original ---------- */
