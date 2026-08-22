@@ -1,1 +1,9 @@
-google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+# PDFLoveMe has no advertising partner.
+#
+# This file previously carried a placeholder AdSense line with a fake
+# publisher id (pub-XXXXXXXXXXXXXXXX). A placeholder is worse than an
+# empty file: crawlers read ads.txt literally, and an unresolvable
+# publisher id reads as a misconfigured or hijacked seller entry.
+#
+# If AdSense is ever approved, replace this whole file with the exact
+# line Google supplies. See docs/ADSENSE_REINSTATE.md.
