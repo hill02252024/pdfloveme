@@ -21,9 +21,9 @@ DevTools → Network shows the same thing: after the page and its libraries
 load, running a tool issues no requests. `pages/how-it-works.html` walks
 through this for a non-technical reader.
 
-One honest exception: the pages link a Google Fonts stylesheet, which is an
-external request at page load. It carries no file content, but it is a
-request to a third party and the site says so rather than claiming zero.
+There is no third-party request at all. The typefaces were loaded from
+Google Fonts until August 2026 and are now served from `vendor/fonts/web/`,
+so nothing about a visit reaches anyone but this site.
 
 ## Tools
 

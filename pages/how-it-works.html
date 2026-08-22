@@ -12,10 +12,9 @@
 <meta property="og:description" content="How browser-based PDF editing actually works, and why a free tool that never uploads your file is a different thing from one that quietly does.">
 <meta property="og:image" content="https://pdfloveme.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/web/Inter-var-latin.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/web/SpaceGrotesk-var-latin.woff2">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -103,7 +102,7 @@
 
       <p>There is no analytics on this site — no Google Analytics, no Plausible, no Matomo, nothing that records what you opened. There is no account system, so there is nothing to log in to and no profile to attach a file to. There is no server-side code at all: the whole thing is static files on GitHub Pages, which means there is no request handler that <em>could</em> receive a document even if someone wanted to write one.</p>
 
-      <p>Being precise about the one exception: the page itself is served over the network, and the typeface comes from Google Fonts. So your browser does make requests — for the page, the stylesheet and the font. What it never sends is the contents of your PDF.</p>
+      <p>Being precise: your browser does make requests. It has to fetch the page, the stylesheet, the fonts and the PDF library in the first place. Every one of them comes from this site and nothing else &mdash; the typefaces used to be loaded from Google, and are now served from here, so no third party sees that you visited at all. Once those files have arrived, working on a document adds no further request. What never gets sent, at any point, is the contents of your PDF.</p>
 
       <h2>The tool where this matters most</h2>
 

@@ -12,10 +12,9 @@
 <meta property="og:description" content="What PDFLoveMe does and does not collect. The tools are free and run in your browser, so the documents you open are never uploaded to any server.">
 <meta property="og:image" content="https://pdfloveme.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/web/Inter-var-latin.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/web/SpaceGrotesk-var-latin.woff2">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -70,13 +69,17 @@
     <p>Every tool on PDFLoveMe runs entirely inside your web browser using JavaScript and WebAssembly. When you merge, split, rotate, convert, encrypt or compress a PDF, the file is read and processed locally on your computer or phone. We do not upload, receive, store, or have any access to your files. There is no server-side processing.</p>
 
     <h2>Information we collect</h2>
-    <p>We do not require accounts and do not collect your documents. We may use privacy-respecting analytics to understand aggregate usage (such as which tools are popular). Any preferences you set are stored locally in your browser using <code>localStorage</code> and are never transmitted to us.</p>
+    <p>Nothing. There are no accounts, no sign-up, and no analytics of any kind &mdash; not Google Analytics, not a self-hosted alternative, not a counting pixel. We cannot tell you how many people used a tool today, because we do not measure it.</p>
+    <p>The site is served by GitHub Pages, which like any web host keeps its own request logs. That is outside our control and is the only record that a visit happened at all.</p>
 
     <h2>Advertising</h2>
-    <p>We may display advertising through Google AdSense to keep the free tools available. Google and its partners may use cookies to serve ads based on your prior visits to this and other websites. You can opt out of personalised advertising via <a href="https://www.google.com/settings/ads" rel="noopener" target="_blank">Google Ad Settings</a>. Ad networks operate independently of the file-processing tools, which remain fully local regardless.</p>
+    <p>There is none. This page previously said we might show Google AdSense; the ad code was removed in August 2026 and no advertising network was ever active on the site. If that ever changes, this section will be rewritten before any ad code goes live, not after.</p>
 
     <h2>Cookies &amp; local storage</h2>
-    <p>We use local storage for your preferences (such as your language or theme preference). Third-party advertising partners may set cookies as described above.</p>
+    <p>We set no cookies at all. The only thing written to your browser's storage is a single <code>localStorage</code> key, <code>pdfloveme_tier</code>, which the site never sets by itself and which exists only as a development switch. Nothing in local storage is ever transmitted anywhere, because nothing is transmitted anywhere.</p>
+
+    <h2>Third parties</h2>
+    <p>The pages load no script, stylesheet, font or image from any other domain. Typefaces were served by Google Fonts until August 2026 and are now hosted here, so no third party learns that you visited.</p>
 
     <h2>Data security</h2>
     <p>Because files are processed locally and never transmitted, there is no document data for us to secure on a server. For encryption, choose a strong password; we never see it and cannot recover it.</p>
@@ -95,6 +98,6 @@
 <footer class="site-footer">
   <div class="wrap"><div class="footer-bottom"><span>© 2026 PDFLoveMe</span><a href="../index.html">Back to home</a></div></div>
 </footer>
-<script src="../js/app.js"></script>
+<script defer src="../js/app.js"></script>
 </body>
 </html>

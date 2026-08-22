@@ -12,15 +12,14 @@
 <meta property="og:description" content="Add notes, highlights, boxes and text on top of a PDF for free. Markup is drawn in your browser, so the document never leaves the device you are on.">
 <meta property="og:image" content="https://pdfloveme.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/web/Inter-var-latin.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/web/SpaceGrotesk-var-latin.woff2">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<script src="../vendor/pdf-lib/pdf-lib-1.17.1.min.js"></script>
-<script src="../vendor/pdfjs/pdf-3.11.174.min.js"></script>
+<script defer src="../vendor/pdf-lib/pdf-lib-1.17.1.min.js"></script>
+<script defer src="../vendor/pdfjs/pdf-3.11.174.min.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -224,8 +223,10 @@
   <div class="wrap"><div class="footer-bottom"><span>© 2026 PDFLoveMe</span><a href="../index.html">Back to home</a></div></div>
 </footer>
 
-<script src="../js/app.js"></script>
+<script defer src="../js/app.js"></script>
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.min.js";
 (function () {
   const { setupDropzone, validateFile, toast, downloadBytes } = window.PDFLove;
@@ -416,6 +417,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.mi
     finally{btn.innerHTML=o;btn.disabled=false;}
   });
 })();
+
+});
 </script>
 </body>
 </html>

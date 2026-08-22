@@ -1,3 +1,22 @@
+/* PDFLoveMe — 自寄存 Space Grotesk + Inter（可變字型，latin / latin-ext）
+   本身係 fonts.googleapis.com 嘅 stylesheet，即係每次開頁都有一個第三方
+   請求。網站成個賣點係「你嘅檔案唔會離開部瀏覽器」，一個去 Google 嘅請求
+   雖然唔帶檔案內容，但都要人相信我哋講嘅嘢。自己寄存之後就冇呢個例外，
+   順便省返一次 render-blocking 嘅跨網域往返。
+
+   用可變字型而唔係靜態字重：版面用緊 Inter 400/500/600 同
+   Space Grotesk 500/600/700，六個靜態檔要 207 KB；兩個可變檔覆蓋
+   同一範圍。字重多咗都唔會再落多個檔。
+   來源：Google Fonts，SIL Open Font License 1.1。 */
+@font-face{font-family:'Inter';font-style:normal;font-weight:400 600;font-display:swap;
+  src:url('/vendor/fonts/web/Inter-var-latin-ext.woff2') format('woff2');unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;}
+@font-face{font-family:'Inter';font-style:normal;font-weight:400 600;font-display:swap;
+  src:url('/vendor/fonts/web/Inter-var-latin.woff2') format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;
+  src:url('/vendor/fonts/web/SpaceGrotesk-var-latin-ext.woff2') format('woff2');unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;}
+@font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;
+  src:url('/vendor/fonts/web/SpaceGrotesk-var-latin.woff2') format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+
 /* ============================================================
    PDFLoveMe — design system + tool UI
    Colors: Ink #16161d / Paper #fbfaf7 / Coral #ff5d52
