@@ -169,6 +169,35 @@ console.log("\n[B1-1] 平面 PDF —— 撳已知座標、輸入文字、下載"
 }
 
 // ============ 2. 拖動：最終座標要係拖之後嗰個 ============
+/**
+ * 一個元素嘅 boundingBox，等到佢連續幾幀都冇再郁先返。
+ *
+ * 呢個唔係「加多陣 sleep 睇下好唔好啲」。B1-2 有三成機率失敗，而失敗同成功
+ * 之間唯一嘅分別就係呢一個數：.ff-box 嘅 top 讀到 313（fail）定 311（pass），
+ * 而兩種情況下真正落手嗰刻佢都已經係 309。填完 #boxText 之後方框仲喺度
+ * 重新排版，測試喺佢定位之前就攞咗個位落手，於是落手點同方框原點嘅偏移差咗
+ * 幾 px，跟住成條期望值都係由呢個過期數計出嚟——告一個唔存在嘅 bug。
+ *
+ * 連續三幀相同先收貨：一幀唔夠，因為 313 → 311 → 309 中間每一步本身都係
+ * 「同上一次唔同」，兩幀之間亦可能啱啱撞到中途值。
+ */
+async function stableBox(selector, { frames = 3, timeoutMs = 3000 } = {}) {
+  const started = Date.now();
+  let last = null, repeats = 0;
+  while (Date.now() - started < timeoutMs) {
+    const b = await page.locator(selector).first().boundingBox();
+    const key = b && [b.x, b.y, b.width, b.height].map((n) => n.toFixed(2)).join(",");
+    if (key && key === last) {
+      if (++repeats >= frames - 1) return b;
+    } else {
+      repeats = 0;
+      last = key;
+    }
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(r)));
+  }
+  throw new Error(`${selector} 喺 ${timeoutMs}ms 內都未停定，量唔到穩定位置`);
+}
+
 console.log("\n[B1-2] 拖動 —— 撳完再拖，最終位置要係拖後嗰個");
 {
   await openTool("form-flat.pdf");
@@ -180,7 +209,7 @@ console.log("\n[B1-2] 拖動 —— 撳完再拖，最終位置要係拖後嗰�
   await page.waitForTimeout(150);
   const box = await page.locator("#pv").boundingBox();
   // 由方框自己身上開始拖（撳落方框而唔係畫布）
-  const el = await page.locator(".ff-box").first().boundingBox();
+  const el = await stableBox(".ff-box");
   const GRAB = 4;                     // 由方框左上角向內 4px 落手
   const targetX = box.x + box.width * TO.x + GRAB;
   const targetY = box.y + box.height * TO.y + GRAB;
