@@ -59,13 +59,61 @@ async function walk(dir, out = []) {
 
 // Last commit that touched this file. Empty string when the file is untracked
 // or the repo has no history — the caller then falls back to mtime.
+/**
+ * Strip what a crawler never sees, so two versions of a page that differ
+ * only in comments compare equal.
+ *
+ * Applied to both sides of every comparison, so a `//` inside a URL being
+ * mangled by the second rule does not matter: it is mangled identically in
+ * the version before and the version after.
+ */
+function visibleOnly(html) {
+  return html
+    .replace(/<!--[\s\S]*?-->/g, "")           // HTML comments
+    .replace(/^[ \t]*\/\/.*$/gm, "")            // whole-line // comments in scripts
+    .replace(/\/\*[\s\S]*?\*\//g, "")          // block comments
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * The date of the last change a crawler could notice.
+ *
+ * `git log -1` would answer "the last commit that touched this file", which
+ * is not the same thing. A commit that only rewords a code comment changes
+ * the file and changes nothing about the page; giving it a fresh lastmod
+ * tells Google to recrawl for no reason, and once a site does that a few
+ * times the field stops being believed.
+ *
+ * So: walk the file's commits newest to oldest, and take the first one
+ * whose content — comments removed — differs from the version before it.
+ */
 async function gitLastmod(file) {
+  const rel = path.relative(ROOT, file);
   try {
     const { stdout } = await run(
-      "git", ["log", "-1", "--format=%cI", "--", path.relative(ROOT, file)],
-      { cwd: ROOT },
+      "git", ["log", "--format=%H %cI", "--", rel], { cwd: ROOT },
     );
-    return stdout.trim();
+    const commits = stdout.trim().split("\n").filter(Boolean)
+      .map((line) => { const i = line.indexOf(" "); return { sha: line.slice(0, i), date: line.slice(i + 1) }; });
+    if (!commits.length) return "";
+
+    const blobAt = async (sha) => {
+      try {
+        const { stdout: out } = await run("git", ["show", `${sha}:${rel}`], { cwd: ROOT });
+        return visibleOnly(out);
+      } catch {
+        return null;   // did not exist at that commit
+      }
+    };
+
+    let newer = await blobAt(commits[0].sha);
+    for (let i = 0; i < commits.length; i++) {
+      const older = i + 1 < commits.length ? await blobAt(commits[i + 1].sha) : null;
+      if (older !== newer) return commits[i].date;
+      newer = older;
+    }
+    return commits[commits.length - 1].date;
   } catch {
     return "";
   }
