@@ -4,24 +4,12 @@
 (function () {
   "use strict";
 
-  // ---- Tier configuration ----
-  const TIER = {
-    free: { maxBytes: 50 * 1024 * 1024, maxFiles: 20, label: "Free" },
-    // Not offered for sale and not reachable through any purchase flow. It
-    // exists only because localStorage.pdfloveme_tier can be set by hand for
-    // local testing. Nothing in the UI advertises it and the terms state the
-    // site is free — do not surface it without building a real tier first.
-    pro:  { maxBytes: 500 * 1024 * 1024, maxFiles: 100, label: "Pro" },
-  };
-
-  function currentTier() {
-    const t = localStorage.getItem("pdfloveme_tier");
-    return t === "pro" ? "pro" : "free";
-  }
-
-  function tierConfig() {
-    return TIER[currentTier()];
-  }
+  // ---- limits ----
+  // Not commercial limits. The whole file is held in an ArrayBuffer, and a
+  // tab that runs out of memory loses the work, so these are the point past
+  // which failing early beats failing halfway through.
+  const MAX_BYTES = 50 * 1024 * 1024;
+  const MAX_FILES = 20;
 
   // ---- helpers ----
   function fmtSize(bytes) {
@@ -41,21 +29,20 @@
     return "📎";
   }
 
-  // Validate a single file against the active tier + accepted extensions.
+  // Validate a single file against the size limit + accepted extensions.
   // accept: array like ['pdf'] or ['jpg','jpeg','png']. Returns {ok, reason}.
   function validateFile(file, accept) {
-    const cfg = tierConfig();
     const name = (file.name || "").toLowerCase();
     if (accept && accept.length) {
       const ok = accept.some((ext) => name.endsWith("." + ext));
       if (!ok) return { ok: false, reason: file.name + " — unsupported file type. Expected: " + accept.join(", ") };
     }
-    if (file.size > cfg.maxBytes) {
+    if (file.size > MAX_BYTES) {
       return {
         ok: false,
-        reason: file.name + " is " + fmtSize(file.size) + " — exceeds the " +
-          cfg.label + " limit of " + fmtSize(cfg.maxBytes) +
-          ".",
+        reason: file.name + " is " + fmtSize(file.size) + " — the limit is " +
+          fmtSize(MAX_BYTES) + " per file, because the whole thing has to fit " +
+          "in your browser's memory.",
       };
     }
     return { ok: true };
@@ -63,14 +50,13 @@
 
   // Validate the whole batch (count + each file). Returns {ok, accepted, reason}.
   function validateBatch(existingCount, newFiles, accept) {
-    const cfg = tierConfig();
     const accepted = [];
-    if (existingCount + newFiles.length > cfg.maxFiles) {
+    if (existingCount + newFiles.length > MAX_FILES) {
       return {
         ok: false,
         accepted,
-        reason: "Too many files. " + cfg.label + " allows up to " + cfg.maxFiles + " files" +
-          ".",
+        reason: "Too many files — " + MAX_FILES + " at a time is the limit, " +
+          "because they are all held in memory at once.",
       };
     }
     for (const f of newFiles) {
@@ -199,21 +185,14 @@
     });
   }
 
-  // ---- tier badge in header (optional element #tierBadge) ----
-  function initTierBadge() {
-    const el = document.getElementById("tierBadge");
-    if (el) el.textContent = tierConfig().label;
-  }
-
   document.addEventListener("DOMContentLoaded", () => {
     initMenu();
     initFaq();
-    initTierBadge();
   });
 
   // ---- export ----
   window.PDFLove = {
-    TIER, currentTier, tierConfig, fmtSize, fileIcon,
+    MAX_BYTES, MAX_FILES, fmtSize, fileIcon,
     validateFile, validateBatch, toast, downloadBlob, downloadBytes,
     setupDropzone, renderFileList,
   };
