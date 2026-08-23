@@ -23,6 +23,7 @@ const fk = require("@pdf-lib/fontkit");
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, "../..");
 const FONT = path.join(REPO, "vendor/fonts/NotoSansTC-HKSCS-subset.ttf");
+const FONT_TIER1 = path.join(REPO, "vendor/fonts/NotoSansTC-Big5L1-subset.ttf");
 const FIXTURES = path.join(HERE, "fixtures");
 
 let pass = 0, fail = 0;
@@ -103,6 +104,14 @@ check("出貨字體 0 隻單數長度 glyph", shipped.odd === 0, `${shipped.odd}
 
 console.log("\n[F2 反面對照] 冇補齊嘅字體要被捉到，而且真係 render 唔出");
 const CONTROL = path.join(FIXTURES, "unpadded-glyphs.ttf");
+// Tier 1 carries the same padding requirement as the shipped font, and the
+// same silent failure if it is missed: fontkit shifts every loca offset
+// right by one bit, so a single odd-length glyph misaligns the rest and the
+// page draws nothing at all. It ships, so it is checked.
+const t1 = await oddGlyphCount(FONT_TIER1);
+console.log(`   ${path.basename(FONT_TIER1)}：${t1.numGlyphs} glyph，loca ${t1.longFormat ? "long" : "short"}，單數長度 ${t1.odd}`);
+check("Tier 1 字體 0 隻單數長度 glyph", t1.odd === 0, `${t1.odd} 隻`);
+
 const ctl = await oddGlyphCount(CONTROL);
 console.log(`   unpadded-glyphs.ttf：${ctl.numGlyphs} glyph，loca ${ctl.longFormat ? "long" : "short"}，單數長度 ${ctl.odd}`);
 check("反面對照：對照字體確實有單數長度 glyph（否則佢對照唔到嘢）", ctl.odd > 0);

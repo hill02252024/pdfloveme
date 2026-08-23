@@ -5,6 +5,7 @@ Build the CJK font the fill-pdf tool embeds, and the deliberately broken
 fonts its tests use as controls.
 
     python3 scripts/build-font-subset.py path/to/NotoSansTC[VF].ttf
+    python3 scripts/build-font-subset.py --tier1   # 只重建第一層，唔使原始字型
 
 Nothing on the site runs this. It exists so the two non-obvious properties
 of the shipped font are reproducible rather than accidental:
@@ -44,6 +45,8 @@ from fontTools.pens.ttGlyphPen import TTGlyphPen
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 OUT_FONT = os.path.join(REPO, "vendor", "fonts", "NotoSansTC-HKSCS-subset.ttf")
+OUT_TIER1 = os.path.join(REPO, "vendor", "fonts", "NotoSansTC-Big5L1-subset.ttf")
+OUT_COVERAGE = os.path.join(REPO, "vendor", "fonts", "NotoSansTC-Big5L1-subset.coverage.txt")
 FIXTURES = os.path.join(HERE, "pdf-tests", "fixtures")
 
 PUNCTUATION = [
@@ -94,6 +97,133 @@ def build_main(source_font):
     print("%s  %d code points  %.2f MB"
           % (os.path.relpath(OUT_FONT, REPO), len(codepoints),
              os.path.getsize(OUT_FONT) / 1048576.0))
+
+
+def big5_level1():
+    """
+    Big5 Level 1 — the 5,401 characters the standard calls 常用字.
+
+    A range walk, not a hand-written list: lead bytes 0xA4-0xC6, trailing
+    0x40-0x7E and 0xA1-0xFE, stopping at 0xC67E where Level 1 ends and
+    Level 2 (次常用字) begins.
+    """
+    found = set()
+    trail = list(range(0x40, 0x7F)) + list(range(0xA1, 0xFF))
+    for hi in range(0xA4, 0xC7):
+        for lo in trail:
+            if hi == 0xC6 and lo > 0x7E:
+                continue
+            try:
+                found.add(ord(bytes([hi, lo]).decode("big5hkscs")))
+            except Exception:
+                continue
+    return found
+
+
+def build_tier1(source_font=None):
+    """
+    The first-tier font: Big5 Level 1 plus Latin and CJK punctuation.
+
+    Built from the shipped HKSCS subset rather than from the original Noto,
+    because Tier 1 is a strict subset of Tier 2 and this way the build needs
+    nothing that is not already in the repository.
+
+    WHY NOT SMALLER. The brief that prompted this asked for 400-600 KB.
+    That is not reachable while keeping 常用字: glyf is 96% of the file, so
+    600 KB across 5,401 CJK outlines is 111 bytes each, and Noto's average
+    here is 333. The alternative — a tier of roughly 1,800 frequent
+    characters — was rejected because a Tier 1 that misses a common surname
+    is worse than no tiering at all: the user then downloads Tier 1 AND
+    Tier 2, 7.4 MB instead of 5.6.
+
+    WHY NOT THE BIG5 ∩ GB2312 INTERSECTION, which does fit in 677 KB: it
+    excludes 陳, the most common surname in Hong Kong, because 陳 is not in
+    GB2312. Same failure, sharper.
+    """
+    if source_font is None:
+        source_font = OUT_FONT
+    cmap = set(TTFont(source_font).getBestCmap().keys())
+    wanted = big5_level1() | set(range(0x20, 0x7F)) | set(PUNCTUATION)
+    codepoints = sorted(wanted & cmap)
+    subprocess.run(
+        ["pyftsubset", source_font, "--unicodes-file=/dev/stdin",
+         "--output-file=" + OUT_TIER1, "--layout-features=", "--no-hinting",
+         "--desubroutinize", "--drop-tables+=DSIG"],
+        input="\n".join("U+%04X" % c for c in codepoints), text=True, check=True)
+    pad_glyphs(OUT_TIER1)
+    write_tier1_coverage()
+    print("%s  %d code points  %.2f MB"
+          % (os.path.relpath(OUT_TIER1, REPO), len(codepoints),
+             os.path.getsize(OUT_TIER1) / 1048576.0))
+
+
+B36 = "0123456789abcdefghijklmnopqrstuvwxyz"
+
+
+def _b36(n):
+    if n == 0:
+        return "0"
+    out = ""
+    while n:
+        out = B36[n % 36] + out
+        n //= 36
+    return out
+
+
+def write_tier1_coverage():
+    """
+    A 9 KB list of what Tier 1 can draw, so the page can pick a tier BEFORE
+    downloading either font.
+
+    Without it, deciding means fetching Tier 1 and reading its cmap, and a
+    reader whose address contains 邨 or 埗 then pays 1.8 MB for a font that
+    cannot draw their address plus 5.6 MB for one that can — worse than the
+    single 5.6 MB file this replaced. The list costs 9 KB, fetched on the
+    first CJK keystroke, and only by people typing Chinese.
+
+    Format: comma-separated runs of code points, each `startDelta` or
+    `startDelta.length`, base 36, delta measured from the end of the run
+    before. 3,677 runs cover 5,516 code points.
+
+    The page re-checks against the font's real cmap once Tier 1 arrives, so
+    a stale list costs one wrong fetch, not a wrong glyph.
+    """
+    cps = sorted(TTFont(OUT_TIER1).getBestCmap().keys())
+    runs, start, prev = [], cps[0], cps[0]
+    for c in cps[1:]:
+        if c == prev + 1:
+            prev = c
+            continue
+        runs.append((start, prev - start + 1))
+        start = prev = c
+    runs.append((start, prev - start + 1))
+
+    parts, cursor = [], 0
+    for st, ln in runs:
+        parts.append(_b36(st - cursor) + ("" if ln == 1 else "." + _b36(ln)))
+        cursor = st + ln
+    encoded = ",".join(parts)
+    with open(OUT_COVERAGE, "w") as fh:
+        fh.write(encoded)
+
+    # Decode what was just written and compare it against the font, using the
+    # same rules the page uses. A list that disagrees with the font sends
+    # readers to the wrong tier; the page recovers, but silently and at the
+    # cost of 1.8 MB, so it is caught here where it is free.
+    listed, cursor = set(), 0
+    for part in encoded.split(","):
+        head, _, tail = part.partition(".")
+        delta = int(head, 36)
+        length = int(tail, 36) if tail else 1
+        begin = cursor + delta
+        listed.update(range(begin, begin + length))
+        cursor = begin + length
+    if listed != set(cps):
+        raise SystemExit("coverage list disagrees with the font: %d missing, %d extra"
+                         % (len(set(cps) - listed), len(listed - set(cps))))
+    print("%s  %d runs  %.1f KB"
+          % (os.path.relpath(OUT_COVERAGE, REPO), len(runs),
+             os.path.getsize(OUT_COVERAGE) / 1024.0))
 
 
 def build_controls(source_font):
@@ -168,8 +298,14 @@ def build_controls(source_font):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    # --tier1 rebuilds only the first-tier font, and needs no argument: it
+    # derives from the HKSCS subset already in the repository.
+    if len(sys.argv) == 2 and sys.argv[1] == "--tier1":
+        build_tier1()
+    elif len(sys.argv) == 2:
+        src = sys.argv[1]
+        build_main(src)
+        build_tier1(OUT_FONT)
+        build_controls(src)
+    else:
         raise SystemExit(__doc__)
-    src = sys.argv[1]
-    build_main(src)
-    build_controls(src)

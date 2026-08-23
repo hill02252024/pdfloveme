@@ -15,9 +15,19 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.mi
   const core = window.PDFFillCore;
   const $ = (id) => document.getElementById(id);
 
-  const FONT_URL = "../vendor/fonts/NotoSansTC-HKSCS-subset.ttf";
-  let fontBytes = null;          // lazily loaded, and only from our own origin
-  let fontPromise = null;        // so two rapid CJK edits do not fetch it twice
+  // Two tiers, because one 5.6 MB download for a single Chinese character was
+  // the whole cost of using this tool in Hong Kong. Tier 1 is Big5 Level 1
+  // (常用字) and covers ordinary names and most address words; Tier 2 adds
+  // Big5 Level 2 and the full HKSCS, which is where 埗, 磡, 脷, 鰂 and 邨 live.
+  // Tier 2 is only fetched when the text actually needs a character Tier 1
+  // does not have, so a 陳大文 fills 1.8 MB instead of 5.6.
+  const FONT_TIER1 = { url: "../vendor/fonts/NotoSansTC-Big5L1-subset.ttf", mb: "1.8" };
+  const FONT_TIER2 = { url: "../vendor/fonts/NotoSansTC-HKSCS-subset.ttf", mb: "5.6" };
+  const TIER1_COVERAGE_URL = "../vendor/fonts/NotoSansTC-Big5L1-subset.coverage.txt";
+
+  let tier1Bytes = null, tier1Cover = null, tier1Promise = null;
+  let tier2Bytes = null, tier2Promise = null;
+  let coverPromise = null;       // the 9 KB list, so the tier is chosen before a font is fetched
 
   let srcBytes = null;           // the untouched original
   let pdfDoc = null;             // pdf.js document, preview only
@@ -34,44 +44,182 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.mi
    * makes no network request at all after the page has loaded. The request
    * is a same-origin GET with no body — nothing about the document is sent.
    */
-  function ensureFont() {
-    if (fontBytes) return Promise.resolve(fontBytes);
-    if (fontPromise) return fontPromise;
-    setFontState("loading");
-    fontPromise = fetch(FONT_URL)
-      .then((res) => {
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        return res.arrayBuffer();
+  /**
+   * Which characters a font can actually draw, read from its own cmap.
+   *
+   * The alternative was to ship the Tier 1 code point list alongside the
+   * font. That list would then be a second thing to keep in step with the
+   * build, and the failure mode when it drifted would be a PDF that draws
+   * blanks — silent, and exactly what the padding work was about. Reading
+   * the cmap costs a few milliseconds and cannot disagree with the file.
+   *
+   * Handles cmap formats 4 and 12; skips format 14 (variation selectors),
+   * which describes no base coverage. pyftsubset emits format 4 here.
+   */
+  function cmapCoverage(bytes) {
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    let cmapOff = 0;
+    const numTables = dv.getUint16(4);
+    for (let i = 0; i < numTables; i++) {
+      const rec = 12 + 16 * i;
+      const tag = String.fromCharCode(bytes[rec], bytes[rec + 1], bytes[rec + 2], bytes[rec + 3]);
+      if (tag === "cmap") { cmapOff = dv.getUint32(rec + 8); break; }
+    }
+    if (!cmapOff) throw new Error("font has no cmap table");
+
+    const cover = new Set();
+    const n = dv.getUint16(cmapOff + 2);
+    let best = 0, bestFmt = -1;
+    for (let i = 0; i < n; i++) {
+      const off = cmapOff + dv.getUint32(cmapOff + 4 + 8 * i + 4);
+      const fmt = dv.getUint16(off);
+      if (fmt === 12 || (fmt === 4 && bestFmt !== 12)) { best = off; bestFmt = fmt; }
+    }
+    if (bestFmt === 4) {
+      const segX2 = dv.getUint16(best + 6), seg = segX2 / 2;
+      const endO = best + 14, startO = endO + segX2 + 2;
+      for (let i = 0; i < seg; i++) {
+        const end = dv.getUint16(endO + 2 * i), start = dv.getUint16(startO + 2 * i);
+        if (start === 0xFFFF) continue;
+        for (let c = start; c <= end && c !== 0x10000; c++) cover.add(c);
+      }
+    } else if (bestFmt === 12) {
+      const groups = dv.getUint32(best + 12);
+      for (let i = 0; i < groups; i++) {
+        const g = best + 16 + 12 * i;
+        const start = dv.getUint32(g), end = dv.getUint32(g + 4);
+        for (let c = start; c <= end; c++) cover.add(c);
+      }
+    } else {
+      throw new Error("font has no usable cmap subtable");
+    }
+    return cover;
+  }
+
+  /** Every character above plain ASCII is one the embedded font must carry. */
+  function coversAll(cover, text) {
+    for (const ch of String(text == null ? "" : text)) {
+      const c = ch.codePointAt(0);
+      if (c > 0x7E && !cover.has(c)) return false;
+    }
+    return true;
+  }
+
+  function fetchFont(tier) {
+    return fetch(tier.url)
+      .then((res) => { if (!res.ok) throw new Error("HTTP " + res.status); return res.arrayBuffer(); })
+      .then((buf) => new Uint8Array(buf));
+  }
+
+  /**
+   * Decode the Tier 1 coverage list: comma-separated runs, each
+   * `startDelta` or `startDelta.length` in base 36, delta from the end of
+   * the run before. Written by scripts/build-font-subset.py.
+   */
+  function decodeCoverage(txt) {
+    const cover = new Set();
+    let cursor = 0;
+    for (const part of txt.split(",")) {
+      if (!part) continue;
+      const dot = part.indexOf(".");
+      const delta = parseInt(dot < 0 ? part : part.slice(0, dot), 36);
+      const len = dot < 0 ? 1 : parseInt(part.slice(dot + 1), 36);
+      const start = cursor + delta;
+      for (let c = start; c < start + len; c++) cover.add(c);
+      cursor = start + len;
+    }
+    return cover;
+  }
+
+  /**
+   * Which tier a piece of text needs, decided from a 9 KB list rather than
+   * by downloading a font and looking.
+   *
+   * If the list cannot be fetched we go straight to Tier 2: guessing Tier 1
+   * and being wrong costs 1.8 MB of wasted download, guessing Tier 2 costs
+   * nothing but bandwidth we would have spent anyway.
+   */
+  function pickTier(text) {
+    if (tier1Cover) return Promise.resolve(coversAll(tier1Cover, text) ? FONT_TIER1 : FONT_TIER2);
+    if (!coverPromise) {
+      coverPromise = fetch(TIER1_COVERAGE_URL)
+        .then((res) => { if (!res.ok) throw new Error("HTTP " + res.status); return res.text(); })
+        .then((txt) => decodeCoverage(txt));
+    }
+    return coverPromise
+      .then((cover) => (coversAll(cover, text) ? FONT_TIER1 : FONT_TIER2))
+      .catch(() => FONT_TIER2);
+  }
+
+  function ensureTier1() {
+    if (tier1Bytes) return Promise.resolve(tier1Bytes);
+    if (tier1Promise) return tier1Promise;
+    setFontState("loading", FONT_TIER1);
+    tier1Promise = fetchFont(FONT_TIER1)
+      .then((bytes) => {
+        tier1Bytes = bytes;
+        // The font itself is the authority from here on; the list was only
+        // ever a way to avoid downloading this file to find out.
+        tier1Cover = cmapCoverage(bytes);
+        setFontState("ready", FONT_TIER1);
+        return bytes;
       })
-      .then((buf) => {
-        fontBytes = new Uint8Array(buf);
-        setFontState("ready");
-        return fontBytes;
-      })
-      .catch((err) => {
-        fontPromise = null;
-        setFontState("error");
-        // Fail loudly. Falling back to a Latin font here would silently
-        // turn 陳大文 into boxes, or throw an encoding error deep inside
-        // pdf-lib with no explanation.
-        throw new Error(
-          "The Chinese font could not be loaded (" + err.message + "), so " +
-          "Chinese text cannot be written into the PDF. Check your connection " +
-          "and try again — Latin-only text still works.");
-      });
-    return fontPromise;
+      .catch((err) => { tier1Promise = null; setFontState("error", FONT_TIER1); throw fontError(err); });
+    return tier1Promise;
+  }
+
+  function ensureTier2() {
+    if (tier2Bytes) return Promise.resolve(tier2Bytes);
+    if (tier2Promise) return tier2Promise;
+    setFontState("loading", FONT_TIER2);
+    tier2Promise = fetchFont(FONT_TIER2)
+      .then((bytes) => { tier2Bytes = bytes; setFontState("ready", FONT_TIER2); return bytes; })
+      .catch((err) => { tier2Promise = null; setFontState("error", FONT_TIER2); throw fontError(err); });
+    return tier2Promise;
+  }
+
+  function fontError(err) {
+    // Fail loudly. Falling back to a Latin font here would silently turn
+    // 陳大文 into boxes, or throw an encoding error deep inside pdf-lib
+    // with no explanation.
+    return new Error(
+      "The Chinese font could not be loaded (" + err.message + "), so " +
+      "Chinese text cannot be written into the PDF. Check your connection " +
+      "and try again — Latin-only text still works.");
+  }
+
+  /**
+   * The font to embed for a given piece of text.
+   *
+   * Once Tier 2 has been fetched it is used for everything: one document
+   * gets one embedded font, and Tier 2 is a superset, so there is nothing
+   * to gain by going back.
+   */
+  function ensureFont(text) {
+    if (tier2Bytes) return Promise.resolve(tier2Bytes);
+    return pickTier(text).then((tier) => {
+      if (tier === FONT_TIER2) return ensureTier2();
+      // Re-check against the font's own cmap. If the list was stale this
+      // escalates once; it never draws a missing glyph.
+      return ensureTier1().then((bytes) =>
+        coversAll(tier1Cover, text) ? bytes : ensureTier2());
+    });
   }
 
   /** Visible state for the font load, so it never fails silently. */
-  function setFontState(state) {
+  function setFontState(state, tier) {
     const el = $("fontState");
     if (!el) return;
+    const which = tier === FONT_TIER2 ? "extended Chinese font" : "Chinese font";
     el.classList.remove("hidden");
     if (state === "loading") {
-      el.textContent = "Loading the Chinese font (about 1.9 MB, once per visit)…";
+      el.textContent = "Loading the " + which + " (about " + tier.mb +
+        " MB, once per visit)…";
       el.dataset.state = "loading";
     } else if (state === "ready") {
-      el.textContent = "Chinese font ready.";
+      el.textContent = tier === FONT_TIER2
+        ? "Extended Chinese font ready — rarer characters can now be written."
+        : "Chinese font ready.";
       el.dataset.state = "ready";
       setTimeout(() => { if (el.dataset.state === "ready") el.classList.add("hidden"); }, 2500);
     } else {
@@ -85,9 +233,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.mi
    * rather than waiting until they press the download button.
    */
   function maybePrefetchFont(text) {
-    if (!fontBytes && !fontPromise && core.needsUnicodeFont(text)) {
-      ensureFont().catch(() => { /* state is already shown */ });
-    }
+    if (!core.needsUnicodeFont(text)) return;
+    // Safe to call on every keystroke: each tier caches its own promise, and
+    // a tier already loaded resolves without touching the network.
+    ensureFont(text).catch(() => { /* state is already shown */ });
   }
 
   // ---------------- load ----------------
@@ -327,10 +476,13 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker-3.11.174.mi
         return;
       }
 
-      const needFont =
-        Object.keys(values).some((k) => core.needsUnicodeFont(values[k])) ||
-        textItems.some((t) => t.text && core.needsUnicodeFont(t.text));
-      const fb = needFont ? await ensureFont() : null;
+      // One document, one embedded font — so the tier is chosen from every
+      // string that will be drawn, not from whichever one was typed last.
+      const allText =
+        Object.keys(values).map((k) => values[k]).join("") +
+        textItems.map((t) => t.text || "").join("");
+      const needFont = core.needsUnicodeFont(allText);
+      const fb = needFont ? await ensureFont(allText) : null;
 
       if (Object.keys(values).length) {
         out = await core.fillAcroForm(out, values,
