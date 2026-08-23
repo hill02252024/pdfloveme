@@ -99,6 +99,61 @@ def build_main(source_font):
              os.path.getsize(OUT_FONT) / 1048576.0))
 
 
+# Hong Kong characters that Big5 Level 1 does not carry.
+#
+# Level 1 is 常用字 as the standard defined it in Taiwan in 1984. It is a good
+# base and a bad stopping point for this site: it cannot write 深水埗, 紅磡,
+# 鰂魚涌, 鴨脷洲 or 屋邨, and it has almost none of written Cantonese, which is
+# what people put in a form's notes field.
+#
+# The alternative considered and rejected was a rule rather than a list —
+# Big5 Level 1 plus every HKSCS addition. That is defensible on paper and
+# wrong here: it comes to 2.74 MB, and it still misses 磡, 冇, 睇 and 諗,
+# because those are Big5 Level 2 rather than HKSCS. A list that names what
+# is needed beats a rule that misses it.
+#
+# Four groups, all intersected with the font before use, so a character the
+# font does not have is dropped rather than failing the build.
+
+HK_PLACES = (
+    "中西區灣仔東南油尖旺深水埗九龍城黃大仙觀塘葵青荃灣屯門元朗北大埔沙田西貢離島"
+    "銅鑼灣鰂魚涌太古柴灣筲箕灣香港仔鴨脷洲薄扶林堅尼地城石塘咀西環上環中環金鐘"
+    "紅磡土瓜灣何文田旺角佐敦尖沙咀油麻地長沙灣荔枝角美孚石硤尾樂富慈雲山黃埔"
+    "藍田秀茂坪牛頭角彩虹九龍灣鑽石山新蒲崗啟德將軍澳寶琳坑口調景嶺"
+    "馬鞍山大圍火炭水泉澳上水粉嶺天水圍兆康朗屏錦田八鄉塱原打鼓嶺沙頭角"
+    "東涌梅窩坪洲長洲南丫愉景灣青衣荔景葵芳葵興大窩口深井青龍頭馬灣欣澳"
+    "氹仔"
+)
+
+# The words an address is built out of, and the characters estate and block
+# names are made of. Most are already in Level 1; the intersection sorts it.
+HK_ADDRESS = (
+    "室座樓層號邨苑閣軒臺台徑道街里巷圍村屋舍房廈園庭居坊路段新界九龍香港大廈"
+    "中心廣場花園商場地舖鋪期棟幢單位平台地下閣樓天台露台車位"
+    "慈樂澤安康泰華榮富順興盛寶祥昌美麗翠碧恒恆悅逸雅頌頤怡欣豪峰景苑晴曉"
+)
+
+# Written Cantonese. A notes field in Hong Kong is not written in Standard
+# Written Chinese, and a form filler that turns 唔記得攞 into boxes is not
+# finished.
+HK_CANTONESE = (
+    "嘅咗喺冇佢哋乜嘢睇諗攞唔係咁嗰呢啲嚟咩嘛咪啦喎囉嘥掂搞掟揸拎郁曬慳靚"
+    "冧氹揼冚嘈嬲孭攰嗌喐嘟嗒嚡嚫嗲嚿呃咦哦噏嚇嘞邊咋咯喇嗱嘩哇噃唓吓咇啱"
+    "撳摷啖睩嗍掹攋抦揦搲焫韞淰嘜唥廿卅乸嗦噉矇淨"
+    "仔女佬妹哥姐婆公媽爸爹奶叔伯姨舅甥姪孫"
+    "食飲瞓行企坐畀俾整乾淨鍾意"
+)
+
+# Surnames common in Hong Kong that Level 1 misses.
+HK_SURNAMES = "鄧邱蕭馮曾詹嚴龔藍簡邵倪湯樑戴翁廖賴聶鄺麥岑譚黎謝葉盧蔡余潘杜"
+
+
+def hk_supplement():
+    """Every code point in the four groups above, de-duplicated."""
+    joined = HK_PLACES + HK_ADDRESS + HK_CANTONESE + HK_SURNAMES
+    return {ord(ch) for ch in joined if not ch.isspace()}
+
+
 def big5_level1():
     """
     Big5 Level 1 — the 5,401 characters the standard calls 常用字.
@@ -143,7 +198,12 @@ def build_tier1(source_font=None):
     if source_font is None:
         source_font = OUT_FONT
     cmap = set(TTFont(source_font).getBestCmap().keys())
-    wanted = big5_level1() | set(range(0x20, 0x7F)) | set(PUNCTUATION)
+    wanted = (big5_level1() | hk_supplement()
+              | set(range(0x20, 0x7F)) | set(PUNCTUATION))
+    dropped = sorted(hk_supplement() - cmap)
+    if dropped:
+        print("  (not in the source font, skipped: %s)"
+              % "".join(chr(c) for c in dropped))
     codepoints = sorted(wanted & cmap)
     subprocess.run(
         ["pyftsubset", source_font, "--unicodes-file=/dev/stdin",

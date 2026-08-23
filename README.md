@@ -70,8 +70,8 @@ tools keep working when a CDN does not.
 | @cantoo/pdf-lib | 2.3.2 | encrypt, unlock |
 | @pdf-lib/fontkit | 1.1.1 | fill-form |
 | JSZip | 3.10.1 | pdf-to-jpg |
-| Noto Sans TC — Big5 Level 1 subset | 1.8 MB | fill-form, first tier |
-| Noto Sans TC — Big5-HKSCS subset | 5.6 MB | fill-form, when the text needs a rarer character |
+| Noto Sans TC — Big5 Level 1 + Hong Kong supplement | 1.8 MB | fill-form, first tier |
+| Noto Sans TC — Big5-HKSCS subset | 5.6 MB | fill-form, when the text needs a genuinely rare character |
 
 `vendor/` is about 11 MB, two thirds of it the CJK font subsets, neither of which is fetched unless someone types Chinese. Version numbers are in
 the filenames on purpose: an upgrade is a visible diff, not a silent swap.
