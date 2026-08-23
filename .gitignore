@@ -10,3 +10,15 @@ test-assets/
 # editor/tooling
 .vscode/
 *.log
+
+# internal working notes — moved to ~/Desktop/GITHUB_PDF_NOTES in Aug 2026
+#
+# GitHub Pages serves every file in this repository, so a committed .md sits
+# at a public URL whether or not anything links to it. robots.txt would only
+# ask crawlers not to fetch these; it would not keep them out of an index.
+# They live outside the repository instead.
+/docs/
+/_*.md
+/SEO_*.md
+/*_AUDIT*.md
+/*_audit*.md

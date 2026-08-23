@@ -6,4 +6,6 @@
 # publisher id reads as a misconfigured or hijacked seller entry.
 #
 # If AdSense is ever approved, replace this whole file with the exact
-# line Google supplies. See docs/ADSENSE_REINSTATE.md.
+# line Google supplies. The step-by-step notes, including which 28 slot
+# positions existed and where they sat, are kept outside this repository
+# in GITHUB_PDF_NOTES/ADSENSE_REINSTATE.md.

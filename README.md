@@ -87,7 +87,6 @@ js/fill-form.js       fill-form UI
 js/fill-pdf-core.js   fill-form's coordinate and drawing core
 vendor/               pinned libraries and the font subset
 scripts/              build and test tooling, never deployed
-docs/                 notes that are not part of the site
 sitemap.xml           generated — see below
 ```
 

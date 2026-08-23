@@ -106,4 +106,4 @@ using a canvas rect that went stale when the page scrolled mid-drag.
 ## Not covered
 
 Touch input, mobile layouts, very large documents, and checkbox / radio /
-dropdown filling (which the tool does not implement). See `_seo_unresolved.md`.
+dropdown filling (which the tool does not implement). Recorded in the working notes kept outside this repository.
