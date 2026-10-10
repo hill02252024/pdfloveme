@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fill In a PDF Form Without Uploading It | PDFLoveMe</title>
-<meta name="description" content="Fill in a PDF form for free, including flat scans with no form fields. Typing and Chinese text run in your browser and the file is never uploaded.">
+<title>Chinese Characters Show as Boxes in a PDF Form | PDFLoveMe</title>
+<meta name="description" content="Chinese typed into a PDF form shows as boxes because standard PDF fonts have no Chinese glyphs. Fill the form in your browser; a font is embedded and the file is not uploaded.">
 <link rel="canonical" href="https://pdfloveme.com/pages/fill-form.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pdfloveme.com/pages/fill-form.html">
-<meta property="og:title" content="Fill In a PDF Form Without Uploading It | PDFLoveMe">
-<meta property="og:description" content="Fill in a PDF form for free, including flat scans with no form fields. Typing and Chinese text run in your browser and the file is never uploaded.">
+<meta property="og:title" content="Chinese Characters Show as Boxes in a PDF Form | PDFLoveMe">
+<meta property="og:description" content="Chinese typed into a PDF form shows as boxes because standard PDF fonts have no Chinese glyphs. Fill it in the browser. The file is not uploaded.">
 <meta property="og:image" content="https://pdfloveme.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="../css/style.css">
@@ -101,7 +101,7 @@
   "applicationCategory": "UtilitiesApplication",
   "operatingSystem": "Any (web browser)",
   "browserRequirements": "Requires JavaScript. No installation and no account.",
-  "description": "Fills interactive AcroForm fields or places text and a drawn signature on a flat or scanned PDF, with Traditional and Simplified Chinese support.",
+  "description": "Fills a PDF form when Chinese characters show as boxes. Embeds a Traditional Chinese font, including Hong Kong characters, and can also place text on a flat scan. The file is not uploaded.",
   "isAccessibleForFree": true,
   "offers": {
     "@type": "Offer",
@@ -159,9 +159,9 @@
     <div class="crumb"><a href="../index.html">Home</a> / <a href="../index.html#tools">Tools</a> / Fill a PDF Form</div>
     <div class="tool-hero">
       <div class="ico">🖊️</div>
-      <h1>Type on any PDF, even a flat scan</h1>
+      <h1>Chinese characters show as boxes in a PDF form</h1>
       <p class="trust-line"><strong>Nothing you open here is uploaded.</strong> The file is read from your own disk, worked on in memory, and handed back as a download. No server ever receives it, and closing the tab discards everything.</p>
-      <p>Type into a real form, or drop text anywhere on a scanned one. Sign it, download it. Your file never leaves this browser.</p>
+      <p>The fonts built into the PDF standard only cover Latin letters, so Chinese typed into a field comes out as boxes, or it shows only while the field is clicked. This page fills the form in your browser and embeds a font when you type Chinese. The file is not uploaded.</p>
     </div>
 
     <div class="panel" style="max-width:1100px;">
@@ -248,6 +248,12 @@
       <h2>If it does not</h2>
       <p>You get overlay mode. Click the spot on the preview where a value belongs, type it, and drag the box until it sits on the line. Font size is adjustable, boxes can be moved after the fact, and each one is anchored to the page you placed it on, so a ten-page contract behaves the way you would expect. On download, the text is stamped onto the page as new content.</p>
       <p>The important part is what stays untouched. Adding text does not rewrite the document — the existing content is left exactly as it was and your additions are appended on top. That is checked by an automated test that extracts the text before and after and compares it character by character, so "we didn't change your document" is a verified claim rather than a reassuring sentence.</p>
+
+      <h2>The characters appear only when you click the field</h2>
+      <p>The characters are stored in the field, but the appearance was drawn with a font that has no Chinese glyphs. Clicking the field shows the stored text. Leaving the field shows that appearance, so you see boxes or a blank. Embedding a font that contains the characters, and drawing the appearance with it, is what keeps the text visible.</p>
+
+      <h2>Traditional Chinese, including Hong Kong characters</h2>
+      <p>A common Big5 subset still leaves gaps in place names. This tool embeds a Noto Sans TC subset that includes HKSCS, so 深水埗, 紅磡, 鰂魚涌 and 鴨脷洲 come out as characters. Traditional and Simplified both use that font. Ordinary text uses the smaller font file; rare characters pull the larger one from this site.</p>
 
       <h2>Chinese, and why it usually fails elsewhere</h2>
       <p>Most browser PDF tools fall over on Chinese, and the reason is technical rather than careless: the fonts built into the PDF standard only cover Latin characters, so writing 陳大文 with them throws an encoding error. This tool embeds a Noto Sans TC subset — Big5-HKSCS plus GB2312, about 16,900 characters — whenever your text contains anything outside Latin-1. HKSCS is the set the Hong Kong government defined for exactly this problem, and it is the reason 深水埗, 紅磡, 鰂魚涌, 鴨脷洲 and 邨 come out as characters rather than gaps; the more common Big5-only subsets cannot write any of them. Traditional and Simplified both come out as readable text, not boxes. It arrives in two parts so that coverage does not cost everybody the same. Ordinary Hong Kong text pulls a 1.8&nbsp;MB font: Big5&nbsp;Level&nbsp;1 — the 5,401 characters the standard calls 常用字 — plus the ones this city actually needs and that standard never had, so 深水埗, 紅磡, 鰂魚涌, 鴨脷洲 and 屋邨 all fit, and so does written Cantonese for the notes field (冇, 嘢, 睇, 諗, 嘅, 咗, 喺). Only genuinely rare characters — 龘 and its kind — pull the full 5.6&nbsp;MB file. Either way it is fetched once, only if you type Chinese, and your browser caches it afterwards. It is served from this site, so it works even when a third-party CDN is down or blocked.</p>
