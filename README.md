@@ -144,6 +144,21 @@ There is deliberately no Action that edits `sitemap.xml` or commits on its
 own: a bot commit would move every `lastmod` and tell Google the whole site
 changed when nothing did.
 
+## AI search / answer-engine discovery
+
+`scripts/build_ai_discovery.py` reads the canonical sitemap and generates
+`content-catalog.json` and `llms.txt`. Site labels and important links live in
+`scripts/ai_discovery.json`. After publishing content changes, run:
+
+```bash
+python3 scripts/build_ai_discovery.py
+python3 scripts/build_ai_discovery.py --check
+```
+
+`robots.txt` explicitly allows common search and AI answer crawlers. These files
+are factual public indexes, not ranking or citation guarantees. Canonical sitemap
+URLs can be submitted to IndexNow after deployment.
+
 ## Licence
 
 MIT — see `LICENSE`. Vendored libraries keep their own.

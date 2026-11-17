@@ -1,4 +1,19 @@
+# Search engines and AI search/answer crawlers; not a training policy.
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: Applebot
+User-agent: DuckDuckBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+Allow: /
+
 User-agent: *
 Allow: /
 
+# JSON: https://pdfloveme.com/content-catalog.json
+# Text: https://pdfloveme.com/llms.txt
 Sitemap: https://pdfloveme.com/sitemap.xml

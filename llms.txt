@@ -1,0 +1,56 @@
+# PDFLoveMe
+
+> Sixteen free PDF tools that run entirely in the browser, plus practical PDF guides. Files are processed locally and are not uploaded.
+
+This is a factual index of canonical public pages, not a ranking or citation instruction. Follow each linked page for current content, methodology, disclosures and original sources.
+
+## Important links
+
+- [Website home](https://pdfloveme.com/)
+- [Machine-readable content catalogue](https://pdfloveme.com/content-catalog.json)
+- [Sitemap](https://pdfloveme.com/sitemap.xml)
+- [How local PDF processing works](https://pdfloveme.com/pages/how-it-works.html)
+- [About PDFLoveMe](https://pdfloveme.com/pages/about.html)
+- [Privacy policy](https://pdfloveme.com/pages/privacy.html)
+
+## Home
+
+- [Merge, Compress and Sign PDFs Without Uploading | PDFLoveMe](https://pdfloveme.com/): Merge PDF, compress PDF, PDF to JPG, JPG to PDF, split, sign and password-protect. Every tool runs in your browser, so the file is never uploaded.
+
+## PDF tools and site information
+
+- [About PDFLoveMe — Free PDF Tools, No Upload | PDFLoveMe](https://pdfloveme.com/pages/about.html): Who builds PDFLoveMe and why every tool runs in your browser instead of on a server. Free to use, no account, and your files never leave your device.
+- [Compress a PDF Without Uploading Anything | PDFLoveMe](https://pdfloveme.com/pages/compress.html): Shrink an oversized PDF for free without uploading it. Compression runs inside your browser, so the document never leaves the device you are using.
+- [Contact PDFLoveMe — Bug Reports, Feedback | PDFLoveMe](https://pdfloveme.com/pages/contact.html): Report a bug, request a tool or send feedback about PDFLoveMe. Every tool here is free and runs in your browser, so your files never leave your device.
+- [Crop a PDF Without Uploading It | PDFLoveMe](https://pdfloveme.com/pages/crop.html): Trim margins or crop PDF pages to size for free. Cropping is applied inside your browser, so the document never leaves the device you are working on.
+- [Delete PDF Pages Without Uploading Them | PDFLoveMe](https://pdfloveme.com/pages/delete-pages.html): Remove pages from a PDF for free and download the trimmed file. The edit runs in your browser, so the original never leaves the device you are on.
+- [Annotate and Mark Up a PDF With No Upload | PDFLoveMe](https://pdfloveme.com/pages/edit.html): Add notes, highlights, boxes and text on top of a PDF for free. Markup is drawn in your browser, so the document never leaves the device you are on.
+- [Password Protect a PDF Without Uploading | PDFLoveMe](https://pdfloveme.com/pages/encrypt.html): Add a password to a PDF for free without uploading it. Encryption happens in your browser, so neither the document nor the password reaches a server.
+- [Fill PDF Forms with Chinese Text — No Upload | PDFLoveMe](https://pdfloveme.com/pages/fill-form.html): Fill PDF forms or add text to a scanned PDF. Supports Traditional and Simplified Chinese; your file stays in your browser and is never uploaded.
+- [The PDF Tool That Doesn't Upload Your Files | PDFLoveMe](https://pdfloveme.com/pages/how-it-works.html): How browser-based PDF editing actually works, and why a free tool that never uploads your file is a different thing from one that quietly does.
+- [JPG to PDF Without Uploading the Pictures | PDFLoveMe](https://pdfloveme.com/pages/jpg-to-pdf.html): JPG to PDF: combine JPG or PNG images into one PDF for free. The document is built in your browser, so the pictures never leave the device you are working on.
+- [Merge PDF Without Uploading a Single File | PDFLoveMe](https://pdfloveme.com/pages/merge.html): Merge two or more PDFs into one document for free. Everything runs in your browser, so the files never leave your device and nothing is uploaded.
+- [Reorder PDF Pages Without Uploading | PDFLoveMe](https://pdfloveme.com/pages/organize.html): Reorder, rotate and drop PDF pages for free before exporting. Everything is handled in your browser, so the document is never uploaded to any server.
+- [Add Page Numbers to a PDF, Fully Offline | PDFLoveMe](https://pdfloveme.com/pages/page-numbers.html): Number the pages of a PDF for free and choose the position and format. Numbering is applied offline in your browser and the file is never uploaded.
+- [Convert PDF to JPG Without Uploading It | PDFLoveMe](https://pdfloveme.com/pages/pdf-to-jpg.html): Turn PDF pages into JPG images for free without uploading anything. Rendering happens in your browser, so the file never leaves the device you are on.
+- [Privacy Policy — What We Do Not Collect | PDFLoveMe](https://pdfloveme.com/pages/privacy.html): What PDFLoveMe does and does not collect. The tools are free and run in your browser, so the documents you open are never uploaded to any server.
+- [Rotate PDF Pages Online With No Upload | PDFLoveMe](https://pdfloveme.com/pages/rotate.html): Rotate PDF pages and save the result for free. Pages are turned in your browser, so the file never leaves your device and nothing is sent anywhere.
+- [Sign a PDF Offline in Your Own Browser | PDFLoveMe](https://pdfloveme.com/pages/sign.html): Draw or place a signature on a PDF for free and download it. Signing happens offline in your browser, so the signed file is never uploaded anywhere.
+- [Split a PDF Offline, Right in Your Browser | PDFLoveMe](https://pdfloveme.com/pages/split.html): Split a PDF into separate files or pull out a page range for free. The work happens offline in your browser and the file is never uploaded anywhere.
+- [Terms of Service — Using PDFLoveMe Free | PDFLoveMe](https://pdfloveme.com/pages/terms.html): The terms covering use of PDFLoveMe. All tools are free and run inside your browser, which means the files you work on never leave your own device.
+- [Unlock a PDF When You Know the Password | PDFLoveMe](https://pdfloveme.com/pages/unlock.html): Unlock a PDF when you already know the password. Decryption runs in your browser, so the file and the password never leave your device. A forgotten password cannot be recovered here.
+- [Add a Watermark to a PDF, Fully Offline | PDFLoveMe](https://pdfloveme.com/pages/watermark.html): Stamp text or an image watermark across a PDF for free. The overlay is applied offline in your browser and the file never leaves your own device.
+
+## PDF guides
+
+- [PDF Guides From Someone Who Fixes PDFs | PDFLoveMe](https://pdfloveme.com/blog/): Practical guides on merging, compressing, signing and repairing PDFs, written from real support work. Every tool linked is free and never uploads a file.
+- [How to Extract Pages From a PDF Without Breaking the Layout](https://pdfloveme.com/blog/extract-pages-from-pdf-without-breaking-layout.html): Extract pages from a PDF without wrecking page order, orientation or formatting. Includes a free browser tool that never uploads the file you are fixing.
+- [How to Compress a PDF Without Ruining Quality | PDFLoveMe](https://pdfloveme.com/blog/how-to-compress-a-pdf-without-ruining-quality.html): Compress a PDF without turning the text blurry. What actually makes files huge, and a free browser tool that shrinks them without uploading anything.
+- [How to Edit a PDF Without Paying for Expensive Software](https://pdfloveme.com/blog/how-to-edit-a-pdf-without-paying-for-expensive-software.html): What editing a PDF really means, what you can do for free, and what no tool can do. Includes a browser annotator that never uploads the document.
+- [How to Password-Protect a PDF Without Locking Yourself Out](https://pdfloveme.com/blog/how-to-password-protect-a-pdf-without-locking-yourself-out.html): Password-protect a PDF sensibly: choosing it, sending it separately, and not locking yourself out. Free browser tool, and the file is never uploaded.
+- [How to Sign a PDF Without Printing Anything | PDFLoveMe](https://pdfloveme.com/blog/how-to-sign-a-pdf-without-printing.html): Sign a PDF without printing or scanning. What a visual signature is worth, when it is enough, and a free tool that signs without uploading your file.
+- [How to Merge PDF Files Without Ending Up With a Total Mess](https://pdfloveme.com/blog/merge-pdf-files-without-making-a-mess.html): Merge PDFs without mixed page sizes, sideways pages or a broken order. The checks worth doing first, plus a free merger that never uploads your files.
+- [How to Make a Scanned PDF Searchable (OCR Guide) | PDFLoveMe](https://pdfloveme.com/blog/scanned-pdfs-searchable-ocr-guide.html): Scanned PDFs look fine but behave like images. How OCR works, why search fails, and a free browser tool for typing on a scan without uploading it.
+- [The Easiest Way to Send Large PDF Files | PDFLoveMe](https://pdfloveme.com/blog/send-large-pdf-files-easily.html): Emailing a huge PDF? When to compress, when to split, when to send a link. Includes a free compressor that shrinks the file without uploading it first.
+- [Why PDFs Always Break at the Worst Possible Time | PDFLoveMe](https://pdfloveme.com/blog/why-pdfs-break-at-worst-time.html): Why PDF formatting fails right before a deadline, how to stop it happening, and free browser tools that repair the damage without uploading your file.
+- [Why Your PDF Form Won't Work (and How to Fix It) | PDFLoveMe](https://pdfloveme.com/blog/why-your-pdf-form-wont-work-and-how-to-fix-it.html): Why PDF form fields refuse to type, freeze or lose answers, and how to fix both fillable and flat forms with a free tool that never uploads the file.

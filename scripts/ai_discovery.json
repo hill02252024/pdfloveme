@@ -1,0 +1,16 @@
+{
+  "siteName": "PDFLoveMe",
+  "description": "Sixteen free PDF tools that run entirely in the browser, plus practical PDF guides. Files are processed locally and are not uploaded.",
+  "publisher": "PDFLoveMe",
+  "language": "en",
+  "sectionLabels": {
+    "home": "Home",
+    "pages": "PDF tools and site information",
+    "blog": "PDF guides"
+  },
+  "importantLinks": [
+    {"name": "How local PDF processing works", "url": "/pages/how-it-works.html"},
+    {"name": "About PDFLoveMe", "url": "/pages/about.html"},
+    {"name": "Privacy policy", "url": "/pages/privacy.html"}
+  ]
+}

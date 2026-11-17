@@ -1,0 +1,243 @@
+{
+  "schemaVersion": "1.0",
+  "name": "PDFLoveMe content catalogue",
+  "siteName": "PDFLoveMe",
+  "publisher": "PDFLoveMe",
+  "origin": "https://pdfloveme.com",
+  "catalogueUrl": "https://pdfloveme.com/content-catalog.json",
+  "pageCount": 33,
+  "note": "Canonical public pages from the published sitemap. Read each page for current details and sources.",
+  "pages": [
+    {
+      "url": "https://pdfloveme.com/",
+      "title": "Merge, Compress and Sign PDFs Without Uploading | PDFLoveMe",
+      "description": "Merge PDF, compress PDF, PDF to JPG, JPG to PDF, split, sign and password-protect. Every tool runs in your browser, so the file is never uploaded.",
+      "language": "en",
+      "section": "home"
+    },
+    {
+      "url": "https://pdfloveme.com/blog/",
+      "title": "PDF Guides From Someone Who Fixes PDFs | PDFLoveMe",
+      "description": "Practical guides on merging, compressing, signing and repairing PDFs, written from real support work. Every tool linked is free and never uploads a file.",
+      "language": "en",
+      "section": "blog"
+    },
+    {
+      "url": "https://pdfloveme.com/blog/extract-pages-from-pdf-without-breaking-layout.html",
+      "title": "How to Extract Pages From a PDF Without Breaking the Layout",
+      "description": "Extract pages from a PDF without wrecking page order, orientation or formatting. Includes a free browser tool that never uploads the file you are fixing.",
+      "language": "en",
+      "section": "blog"
+    },
+    {
+      "url": "https://pdfloveme.com/blog/how-to-compress-a-pdf-without-ruining-quality.html",
+      "title": "How to Compress a PDF Without Ruining Quality | PDFLoveMe",
+      "description": "Compress a PDF without turning the text blurry. What actually makes files huge, and a free browser tool that shrinks them without uploading anything.",
+      "language": "en",
+      "section": "blog"
+    },
+    {
+      "url": "https://pdfloveme.com/blog/how-to-edit-a-pdf-without-paying-for-expensive-software.html",
+      "title": "How to Edit a PDF Without Paying for Expensive Software",
+      "description": "What editing a PDF really means, what you can do for free, and what no tool can do. Includes a browser annotator that never uploads the document.",
+      "language": "en",
+      "section": "blog"
+    },
+    {
+      "url": "https://pdfloveme.com/blog/how-to-password-protect-a-pdf-without-locking-yourself-out.html",
+      "title": "How to Password-Protect a PDF Without Locking Yourself Out",
+      "description": "Password-protect a PDF sensibly: choosing it, sending it separately, and not locking yourself out. Free browser tool, and the file is never uploaded.",
+      "language": "en",
+      "section": "blog"
+    },
+    {
+      "url": "https://pdfloveme.com/blog/how-to-sign-a-pdf-without-printing.html",
+      "title": "How to Sign a PDF Without Printing Anything | PDFLoveMe",
+      "description": "Sign a PDF without printing or scanning. What a visual signature is worth, when it is enough, and a free tool that signs without uploading your file.",
+      "language": "en",
+      "section": "blog"
+    },
+    {
+      "url": "https://pdfloveme.com/blog/merge-pdf-files-without-making-a-mess.html",
+      "title": "How to Merge PDF Files Without Ending Up With a Total Mess",
+      "description": "Merge PDFs without mixed page sizes, sideways pages or a broken order. The checks worth doing first, plus a free merger that never uploads your files.",
+      "language": "en",
+      "section": "blog"
+    },
+    {
+      "url": "https://pdfloveme.com/blog/scanned-pdfs-searchable-ocr-guide.html",
+      "title": "How to Make a Scanned PDF Searchable (OCR Guide) | PDFLoveMe",
+      "description": "Scanned PDFs look fine but behave like images. How OCR works, why search fails, and a free browser tool for typing on a scan without uploading it.",
+      "language": "en",
+      "section": "blog"
+    },
+    {
+      "url": "https://pdfloveme.com/blog/send-large-pdf-files-easily.html",
+      "title": "The Easiest Way to Send Large PDF Files | PDFLoveMe",
+      "description": "Emailing a huge PDF? When to compress, when to split, when to send a link. Includes a free compressor that shrinks the file without uploading it first.",
+      "language": "en",
+      "section": "blog"
+    },
+    {
+      "url": "https://pdfloveme.com/blog/why-pdfs-break-at-worst-time.html",
+      "title": "Why PDFs Always Break at the Worst Possible Time | PDFLoveMe",
+      "description": "Why PDF formatting fails right before a deadline, how to stop it happening, and free browser tools that repair the damage without uploading your file.",
+      "language": "en",
+      "section": "blog"
+    },
+    {
+      "url": "https://pdfloveme.com/blog/why-your-pdf-form-wont-work-and-how-to-fix-it.html",
+      "title": "Why Your PDF Form Won't Work (and How to Fix It) | PDFLoveMe",
+      "description": "Why PDF form fields refuse to type, freeze or lose answers, and how to fix both fillable and flat forms with a free tool that never uploads the file.",
+      "language": "en",
+      "section": "blog"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/about.html",
+      "title": "About PDFLoveMe — Free PDF Tools, No Upload | PDFLoveMe",
+      "description": "Who builds PDFLoveMe and why every tool runs in your browser instead of on a server. Free to use, no account, and your files never leave your device.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/compress.html",
+      "title": "Compress a PDF Without Uploading Anything | PDFLoveMe",
+      "description": "Shrink an oversized PDF for free without uploading it. Compression runs inside your browser, so the document never leaves the device you are using.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/contact.html",
+      "title": "Contact PDFLoveMe — Bug Reports, Feedback | PDFLoveMe",
+      "description": "Report a bug, request a tool or send feedback about PDFLoveMe. Every tool here is free and runs in your browser, so your files never leave your device.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/crop.html",
+      "title": "Crop a PDF Without Uploading It | PDFLoveMe",
+      "description": "Trim margins or crop PDF pages to size for free. Cropping is applied inside your browser, so the document never leaves the device you are working on.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/delete-pages.html",
+      "title": "Delete PDF Pages Without Uploading Them | PDFLoveMe",
+      "description": "Remove pages from a PDF for free and download the trimmed file. The edit runs in your browser, so the original never leaves the device you are on.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/edit.html",
+      "title": "Annotate and Mark Up a PDF With No Upload | PDFLoveMe",
+      "description": "Add notes, highlights, boxes and text on top of a PDF for free. Markup is drawn in your browser, so the document never leaves the device you are on.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/encrypt.html",
+      "title": "Password Protect a PDF Without Uploading | PDFLoveMe",
+      "description": "Add a password to a PDF for free without uploading it. Encryption happens in your browser, so neither the document nor the password reaches a server.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/fill-form.html",
+      "title": "Fill PDF Forms with Chinese Text — No Upload | PDFLoveMe",
+      "description": "Fill PDF forms or add text to a scanned PDF. Supports Traditional and Simplified Chinese; your file stays in your browser and is never uploaded.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/how-it-works.html",
+      "title": "The PDF Tool That Doesn't Upload Your Files | PDFLoveMe",
+      "description": "How browser-based PDF editing actually works, and why a free tool that never uploads your file is a different thing from one that quietly does.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/jpg-to-pdf.html",
+      "title": "JPG to PDF Without Uploading the Pictures | PDFLoveMe",
+      "description": "JPG to PDF: combine JPG or PNG images into one PDF for free. The document is built in your browser, so the pictures never leave the device you are working on.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/merge.html",
+      "title": "Merge PDF Without Uploading a Single File | PDFLoveMe",
+      "description": "Merge two or more PDFs into one document for free. Everything runs in your browser, so the files never leave your device and nothing is uploaded.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/organize.html",
+      "title": "Reorder PDF Pages Without Uploading | PDFLoveMe",
+      "description": "Reorder, rotate and drop PDF pages for free before exporting. Everything is handled in your browser, so the document is never uploaded to any server.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/page-numbers.html",
+      "title": "Add Page Numbers to a PDF, Fully Offline | PDFLoveMe",
+      "description": "Number the pages of a PDF for free and choose the position and format. Numbering is applied offline in your browser and the file is never uploaded.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/pdf-to-jpg.html",
+      "title": "Convert PDF to JPG Without Uploading It | PDFLoveMe",
+      "description": "Turn PDF pages into JPG images for free without uploading anything. Rendering happens in your browser, so the file never leaves the device you are on.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/privacy.html",
+      "title": "Privacy Policy — What We Do Not Collect | PDFLoveMe",
+      "description": "What PDFLoveMe does and does not collect. The tools are free and run in your browser, so the documents you open are never uploaded to any server.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/rotate.html",
+      "title": "Rotate PDF Pages Online With No Upload | PDFLoveMe",
+      "description": "Rotate PDF pages and save the result for free. Pages are turned in your browser, so the file never leaves your device and nothing is sent anywhere.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/sign.html",
+      "title": "Sign a PDF Offline in Your Own Browser | PDFLoveMe",
+      "description": "Draw or place a signature on a PDF for free and download it. Signing happens offline in your browser, so the signed file is never uploaded anywhere.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/split.html",
+      "title": "Split a PDF Offline, Right in Your Browser | PDFLoveMe",
+      "description": "Split a PDF into separate files or pull out a page range for free. The work happens offline in your browser and the file is never uploaded anywhere.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/terms.html",
+      "title": "Terms of Service — Using PDFLoveMe Free | PDFLoveMe",
+      "description": "The terms covering use of PDFLoveMe. All tools are free and run inside your browser, which means the files you work on never leave your own device.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/unlock.html",
+      "title": "Unlock a PDF When You Know the Password | PDFLoveMe",
+      "description": "Unlock a PDF when you already know the password. Decryption runs in your browser, so the file and the password never leave your device. A forgotten password cannot be recovered here.",
+      "language": "en",
+      "section": "pages"
+    },
+    {
+      "url": "https://pdfloveme.com/pages/watermark.html",
+      "title": "Add a Watermark to a PDF, Fully Offline | PDFLoveMe",
+      "description": "Stamp text or an image watermark across a PDF for free. The overlay is applied offline in your browser and the file never leaves your own device.",
+      "language": "en",
+      "section": "pages"
+    }
+  ]
+}
